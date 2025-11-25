@@ -44,35 +44,42 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
 
   Uint8List? processedImage; // Detected frame from server
   bool sendingFrame = false; // Control sending to prevent overlap
+  bool connected = true;
   double lastLatency = 0.0; // in milliseconds
   int frameIntervalMs = 100; // Default: send 10 FPS
 
   void _initWebSocket() {
     try {
       channel = WebSocketChannel.connect(
-        Uri.parse("ws://192.168.1.10:8080/ws"),
+        Uri.parse("ws://10.77.203.143:8080/ws"),
       );
       print("Socket connecting...");
-
+      connected = true;
       channel!.stream.listen(
         (message) {
-          print("Received message from server!");
+          print(
+            "Received message from server!..............................................................",
+          );
+          print(message);
           final receiveTime = DateTime.now().millisecondsSinceEpoch;
-          setState(() {
-            processedImage = message as Uint8List?;
-          });
+          // setState(() {
+          //   processedImage = message as Uint8List?;
+          // });
         },
         onError: (error) {
           print("❌ WebSocket error: $error");
+          connected = false;
           _reconnectWebSocket();
         },
         onDone: () {
           print("❌ WebSocket closed");
+          connected = false;
           _reconnectWebSocket();
         },
       );
     } catch (e) {
       print("❌ Failed to connect WebSocket: $e");
+      connected = false;
       _reconnectWebSocket();
     }
   }
@@ -90,7 +97,7 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
     // Initialize camera
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.low,
+      ResolutionPreset.medium,
       imageFormatGroup: ImageFormatGroup.bgra8888,
     );
 
@@ -102,30 +109,41 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
         // Limit sending frame rate
         if (!sendingFrame) {
           sendingFrame = true;
-          await sendFrame(image);
+          if (connected) await sendFrame(image);
           sendingFrame = false;
         }
       });
     });
   }
 
-  /// Convert BGRA8888 CameraImage to JPEG
   Uint8List convertBGRA8888toJPEG(CameraImage image) {
     final width = image.width;
     final height = image.height;
-    final img.Image imgRGB = img.Image(width: width, height: height);
+
+    // Create an image with RGBA
+    final img.Image imgRGB = img.Image(
+      width: width,
+      height: height,
+      numChannels: 4,
+    );
 
     final plane = image.planes[0];
     final bytes = plane.bytes;
+    final bytesPerRow = plane.bytesPerRow;
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        final index = (y * width + x) * 4;
+        final index = y * bytesPerRow + x * 4;
+
+        // Make sure we do NOT exceed bytes length
+        if (index + 3 >= bytes.length) continue;
+
         final b = bytes[index];
         final g = bytes[index + 1];
         final r = bytes[index + 2];
         final a = bytes[index + 3];
-        imgRGB.setPixel(x, y, img.ColorFloat32.rgba(r, g, b, a));
+
+        imgRGB.setPixelRgba(x, y, r, g, b, a);
       }
     }
 
@@ -135,9 +153,7 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
   /// Send frame to server and measure latency
   Future<void> sendFrame(CameraImage image) async {
     final sendTime = DateTime.now().millisecondsSinceEpoch;
-
     Uint8List jpegBytes = convertBGRA8888toJPEG(image);
-
     try {
       channel!.sink.add(jpegBytes);
 

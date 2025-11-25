@@ -1,14 +1,14 @@
 import uvicorn
-import numpy as np
-import cv2
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 from PIL import Image
+import numpy as np
+from ultralytics import YOLO
 
 app = FastAPI()
 
-# Allow all origins (or restrict to your phone IP)
+# Allow all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,28 +16,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Dummy detection function
-def detect_objects(frame: np.ndarray):
-    # Example: convert to gray and draw a dummy rectangle
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-    cv2.rectangle(frame, (50,50), (200,200), (0,255,0), 2)
-    return frame
+# Load YOLOv8n model
+model = YOLO("yolov8n.pt")  # path to your YOLOv8 nano weights
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    print("Client connected")
+
     while True:
-        data = await websocket.receive_bytes()  # Receive JPEG bytes
-        image = Image.open(BytesIO(data))
-        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        try:
+            # Receive JPEG bytes from client
+            data = await websocket.receive_bytes()
+            image = Image.open(BytesIO(data)).convert("RGB")
+            frame = np.array(image)  # H x W x 3, RGB
 
-        # Run detection
-        output_frame = detect_objects(frame)
+            # Run YOLOv8 inference
+            results = model(frame)
+            detected_objects = []
 
-        # Send back result as JPEG
-        _, jpeg = cv2.imencode(".jpg", output_frame)
-        await websocket.send_bytes(jpeg.tobytes())
+            # Extract detected class labels
+            for r in results:
+                # r.boxes.cls contains class indices, r.names maps index -> label
+                labels = [r.names[int(cls)] for cls in r.boxes.cls]
+                detected_objects.extend(labels)
+
+            # Remove duplicates if desired
+            detected_objects = list(set(detected_objects))
+
+            # Send list of labels as a UTF-8 encoded string (JSON could also be used)
+            await websocket.send_json({"objects": detected_objects})
+
+        except Exception as e:
+            print("WebSocket error:", e)
+            break
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080, reload=True)
