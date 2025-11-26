@@ -1,55 +1,68 @@
 import uvicorn
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
-from io import BytesIO
-from PIL import Image
+import json
+import os
 import numpy as np
+import cv2
+from fastapi import FastAPI, WebSocket
 from ultralytics import YOLO
+from datetime import datetime
 
 app = FastAPI()
 
-# Allow all origins
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Load YOLOv8n model
-model = YOLO("yolov8n.pt")  # path to your YOLOv8 nano weights
+model = YOLO("yolov8n.pt")
+
+# Create folder to save frames
+save_dir = "reconstructed_frames"
+os.makedirs(save_dir, exist_ok=True)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    print("Client connected")
+    frame_count = 0
 
     while True:
-        try:
-            # Receive JPEG bytes from client
-            data = await websocket.receive_bytes()
-            image = Image.open(BytesIO(data)).convert("RGB")
-            frame = np.array(image)  # H x W x 3, RGB
+        # Receive JSON message
+        data = await websocket.receive_text()
+        message = json.loads(data)
 
-            # Run YOLOv8 inference
-            results = model(frame)
-            detected_objects = []
+        width = message["width"]
+        height = message["height"]
+        bytesPerRow = message["bytesPerRow"]
+        raw_bytes = np.frombuffer(bytes(message["bytes"]), dtype=np.uint8)
 
-            # Extract detected class labels
-            for r in results:
-                # r.boxes.cls contains class indices, r.names maps index -> label
-                labels = [r.names[int(cls)] for cls in r.boxes.cls]
-                detected_objects.extend(labels)
+        # Reconstruct BGRA8888 frame
+        bgra_frame = np.zeros((height, width, 4), dtype=np.uint8)
+        for y in range(height):
+            start = y * bytesPerRow
+            end = start + width * 4
+            bgra_frame[y, :, :] = np.frombuffer(raw_bytes[start:end], dtype=np.uint8).reshape((width, 4))
 
-            # Remove duplicates if desired
-            detected_objects = list(set(detected_objects))
+        # Convert BGRA → RGB
+        rgb_frame = cv2.cvtColor(bgra_frame, cv2.COLOR_BGRA2RGB)
 
-            # Send list of labels as a UTF-8 encoded string (JSON could also be used)
-            await websocket.send_json({"objects": detected_objects})
+        # Save reconstructed frame
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        save_path = os.path.join(save_dir, f"frame_{timestamp}.jpg")
+        cv2.imwrite(save_path, cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR))  # save as BGR for OpenCV
 
-        except Exception as e:
-            print("WebSocket error:", e)
-            break
+        # Run YOLO detection
+        results = model(rgb_frame)
+        labels_list = []
+       
+        # `results[0].boxes` is a Boxes object
+        for box in results[0].boxes:
+            label_index = int(box.cls)       # .cls is already a scalar (tensor-like)
+            confidence = float(box.conf)     # .conf is already a scalar
+            label_name = model.names[label_index]
+            labels_list.append({"label": label_name, "confidence": confidence})
+
+        # Send JSON back
+        await websocket.send_text(json.dumps({"detections": labels_list}))
+        
+        frame_count += 1
+        print(f"Processed and saved frame #{frame_count}: {save_path}")
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

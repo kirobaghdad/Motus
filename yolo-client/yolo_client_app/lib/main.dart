@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
@@ -45,9 +46,9 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
   Uint8List? processedImage; // Detected frame from server
   bool sendingFrame = false; // Control sending to prevent overlap
   bool connected = true;
-  double lastLatency = 0.0; // in milliseconds
-  int frameIntervalMs = 100; // Default: send 10 FPS
-
+  int lastLatency = 0; // in milliseconds
+  int frameIntervalMs = 10; // Default: send 10 FPS
+  int sendTime = 0;
   void _initWebSocket() {
     try {
       channel = WebSocketChannel.connect(
@@ -62,9 +63,10 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
           );
           print(message);
           final receiveTime = DateTime.now().millisecondsSinceEpoch;
-          // setState(() {
-          //   processedImage = message as Uint8List?;
-          // });
+          setState(() {
+            // processedImage = message as Uint8List?;
+            lastLatency = receiveTime - sendTime;
+          });
         },
         onError: (error) {
           print("❌ WebSocket error: $error");
@@ -109,7 +111,7 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
         // Limit sending frame rate
         if (!sendingFrame) {
           sendingFrame = true;
-          if (connected) await sendFrame(image);
+          if (connected) await sendFrame(image, channel!);
           sendingFrame = false;
         }
       });
@@ -150,21 +152,21 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
     return Uint8List.fromList(img.encodeJpg(imgRGB, quality: 50));
   }
 
-  /// Send frame to server and measure latency
-  Future<void> sendFrame(CameraImage image) async {
-    final sendTime = DateTime.now().millisecondsSinceEpoch;
-    Uint8List jpegBytes = convertBGRA8888toJPEG(image);
-    try {
-      channel!.sink.add(jpegBytes);
+  Future<void> sendFrame(CameraImage image, WebSocketChannel channel) async {
+    sendTime = DateTime.now().millisecondsSinceEpoch;
+    final width = image.width;
+    final height = image.height;
+    final plane = image.planes[0];
 
-      // Latency will be updated when server sends back the frame
-      setState(() {
-        lastLatency =
-            DateTime.now().millisecondsSinceEpoch - sendTime.toDouble();
-      });
-    } catch (e) {
-      print("Error sending frame: $e");
-    }
+    // Prepare a JSON object with metadata
+    final message = {
+      "width": width,
+      "height": height,
+      "bytesPerRow": plane.bytesPerRow,
+      "bytes": plane.bytes.buffer.asUint8List(), // raw bytes
+    };
+
+    channel.sink.add(jsonEncode(message));
   }
 
   @override
