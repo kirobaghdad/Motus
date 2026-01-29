@@ -25,7 +25,7 @@ class Signaling:
                 print(f"Error sending offer: {response.status}")
 
     async def receive(self):
-        url = f"{self.server_url}/answer"
+        url = f"{self.server_url}/ws"
         async with self.session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
@@ -44,7 +44,7 @@ async def run():
     and displays the annotated video stream with performance metrics.
     """
     # Placeholder for the signaling server URL
-    signaling = Signaling("http://192.168.107.143:8080")
+    signaling = Signaling("http://172.28.121.105:8080")
     pc = RTCPeerConnection()
     
     # Create a data channel to send frames and receive detections

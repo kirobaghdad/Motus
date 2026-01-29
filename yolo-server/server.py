@@ -29,17 +29,26 @@ async def websocket_endpoint(websocket: WebSocket):
         width = message["width"]
         height = message["height"]
         bytesPerRow = message["bytesPerRow"]
-        raw_bytes = np.frombuffer(bytes(message["bytes"]), dtype=np.uint8)
+        # The client sends the bytes as a hex string.
+        byte_string = bytes.fromhex(message["bytes"])
+        
 
-        # Reconstruct BGRA8888 frame
-        bgra_frame = np.zeros((height, width, 4), dtype=np.uint8)
-        for y in range(height):
-            start = y * bytesPerRow
-            end = start + width * 4
-            bgra_frame[y, :, :] = np.frombuffer(raw_bytes[start:end], dtype=np.uint8).reshape((width, 4))
+        # Reconstruct BGRA8888 frame from buffer
+        bgra_frame = np.lib.stride_tricks.as_strided(
+            np.frombuffer(byte_string, dtype=np.uint8),
+            shape=(height, width, 4),
+            strides=(bytesPerRow, 4, 1)
+        )
 
-        # Convert BGRA → RGB
-        rgb_frame = cv2.cvtColor(bgra_frame, cv2.COLOR_BGRA2RGB)
+        # Convert BGRA to RGB
+        try:
+            rgb_frame = cv2.cvtColor(bgra_frame, cv2.COLOR_BGRA2RGB)
+            if rgb_frame is None or rgb_frame.size == 0:
+                print("Error: Frame conversion to RGB failed.")
+                continue
+        except cv2.error as e:
+            print(f"OpenCV error during color conversion: {e}")
+            continue
 
         # Save reconstructed frame
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -62,6 +71,8 @@ async def websocket_endpoint(websocket: WebSocket):
         
         frame_count += 1
         print(f"Processed and saved frame #{frame_count}: {save_path}")
+
+    # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

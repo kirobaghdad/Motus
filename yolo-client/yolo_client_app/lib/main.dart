@@ -52,7 +52,7 @@ class _CameraStreamPageState extends State<CameraStreamPage> {
   void _initWebSocket() {
     try {
       channel = WebSocketChannel.connect(
-        Uri.parse("ws://10.77.203.143:8080/ws"),
+        Uri.parse("ws://172.28.113.160:8080/ws"),
       );
       print("Socket connecting...");
       connected = true;
