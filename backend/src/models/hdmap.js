@@ -44,7 +44,7 @@ class HDMap {
 
   // Returns all edges
   getNodeEdges(id) {
-    return this.nodeEdges[id] || { incoming: [], outgoing: [], all: [] };
+    return (this.nodeEdges[id] && this.nodeEdges[id].all) || [];
   }
 
   getIncomingEdges(id) {
@@ -67,9 +67,16 @@ class HDMap {
     this.nodeEdges[edge.to].all.push(edge);
   }
 
-  // Utility: get neighbor node ids for a node (outgoing)
-  getNeighbors(id) {
-    return this.getOutgoingEdges(id).map(e => e.to);
+  // Utility: get neighbor node id for a node
+  getNeighbour(id, edge) {
+    if (!edge) return null;
+    if (edge.to === id) {
+      return edge.from;
+    } else if (edge.from === id) {
+      return edge.to;
+    } else {
+      return null;
+    }
   }
 }
 

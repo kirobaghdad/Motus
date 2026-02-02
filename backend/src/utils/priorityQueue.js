@@ -1,6 +1,3 @@
-// src/utils/priorityQueue.js
-// Min-heap priority queue with decreaseKey support
-
 class PriorityQueue {
   constructor() {
     this.heap = []; // array of { key, priority }
@@ -15,7 +12,23 @@ class PriorityQueue {
     return this.size() === 0;
   }
 
-  _swap(i, j) {
+  parent(i) {
+    return Math.floor((i-1)/2);
+  }
+
+  left(i) {
+    return 2*i+1;
+  }
+
+  right(i) {
+    return 2*i+2;
+  }
+
+  contain(key) {
+    return this.indexMap.has(key);
+  }
+
+  exchange(i, j) {
     const a = this.heap[i];
     const b = this.heap[j];
     this.heap[i] = b;
@@ -24,65 +37,60 @@ class PriorityQueue {
     this.indexMap.set(b.key, i);
   }
 
-  _siftUp(idx) {
-    while (idx > 0) {
-      const parent = Math.floor((idx - 1) / 2);
-      if (this.heap[parent].priority <= this.heap[idx].priority) break;
-      this._swap(parent, idx);
-      idx = parent;
+  Min_Heapify(i) {
+    const l = this.left(i);
+    const r = this.right(i);
+    let smallest = i;
+    if (l < this.size() && this.heap[l].priority < this.heap[smallest].priority) {
+      smallest = l;
+    }
+    if (r < this.size() && this.heap[r].priority < this.heap[smallest].priority) {
+      smallest = r;
+    }
+    if (smallest !== i) {
+      this.exchange(i, smallest);
+      this.Min_Heapify(smallest);
     }
   }
 
-  _siftDown(idx) {
-    const n = this.size();
-    while (true) {
-      let left = idx * 2 + 1;
-      let right = idx * 2 + 2;
-      let smallest = idx;
-      if (left < n && this.heap[left].priority < this.heap[smallest].priority) smallest = left;
-      if (right < n && this.heap[right].priority < this.heap[smallest].priority) smallest = right;
-      if (smallest === idx) break;
-      this._swap(idx, smallest);
-      idx = smallest;
+  pop() {
+    if (this.size() === 0) {
+      // empty heap
+      return null;
+    }
+    this.exchange(0, this.size()-1);
+    const min = this.heap.pop();
+    this.indexMap.delete(min.key);
+    if (this.size() > 0) this.Min_Heapify(0);
+    return min;
+  }
+
+  Decrease_Key(i, value) {
+    if (value > this.heap[i].priority) {
+      return;
+    }
+    this.heap[i].priority = value;
+    while (i > 0 && this.heap[this.parent(i)].priority > this.heap[i].priority) {
+      const p = this.parent(i);
+      this.exchange(i, p);
+      i = p;
     }
   }
 
   push(key, priority) {
     if (this.indexMap.has(key)) {
-      // Already present, use decreaseKey if new priority is better
+      // Already present, use decreaseKey if new priority is smaller
       const i = this.indexMap.get(key);
       if (this.heap[i].priority > priority) {
-        this.heap[i].priority = priority;
-        this._siftUp(i);
+        this.Decrease_Key(i,priority);
       }
       return;
     }
     const node = { key, priority };
     this.heap.push(node);
-    const idx = this.heap.length - 1;
-    this.indexMap.set(key, idx);
-    this._siftUp(idx);
-  }
-
-  decreaseKey(key, newPriority) {
-    if (!this.indexMap.has(key)) return this.push(key, newPriority);
-    const idx = this.indexMap.get(key);
-    if (this.heap[idx].priority <= newPriority) return;
-    this.heap[idx].priority = newPriority;
-    this._siftUp(idx);
-  }
-
-  pop() {
-    if (this.isEmpty()) return null;
-    const top = this.heap[0];
-    const last = this.heap.pop();
-    this.indexMap.delete(top.key);
-    if (this.heap.length > 0) {
-      this.heap[0] = last;
-      this.indexMap.set(last.key, 0);
-      this._siftDown(0);
-    }
-    return top;
+    const i = this.heap.length - 1;
+    this.indexMap.set(key, i);
+    this.Decrease_Key(i,priority);
   }
 }
 

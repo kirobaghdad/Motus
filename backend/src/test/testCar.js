@@ -11,8 +11,23 @@ const socket = io(serverUrl);
 
 socket.on('connect', () => {
   console.log('Car connected', socket.id);
+  // register with server so it can target this car by id
+  socket.emit('register-car', { carId });
+  console.log(`Registered carId: ${carId}`);
+
   let lat = parseFloat(process.env.INIT_LAT) || 12.34;
   let lng = parseFloat(process.env.INIT_LNG) || 56.78;
+
+  // Listen for path/sub-goals from the server
+  socket.on('sub-goals', (payload) => {
+    console.log('Car received sub-goals:', payload);
+    if (payload && Array.isArray(payload.poses)) {
+      console.log('Path poses:');
+      payload.poses.forEach((p, idx) => {
+        console.log(`  ${idx}: lat=${p.lat}, lng=${p.lng}`);
+      });
+    }
+  });
 
   setInterval(() => {
     // simulate small movement

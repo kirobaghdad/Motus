@@ -1,6 +1,8 @@
+require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const http = require('http');
 const {Server} = require('socket.io');
+const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,10 +14,16 @@ const io = new Server(server, {
 });
 
 app.use(express.json()); // allow app to read json data
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 // Link the routes with a prefix
 const tripRoutes = require('./routes/tripRoutes.js');
+const authRoutes = require('./routes/authUser.js');
 app.use('/api/trip', tripRoutes);
+app.use('/api/auth', authRoutes);
+
+// Make io available to controllers via app
+app.set('io', io);
 
 // Register socket handlers
 require('./sockets/trackingHandlers')(io);
