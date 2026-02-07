@@ -63,16 +63,16 @@ if __name__ == "__main__":
         print("Initializing Motor Driver...")
         motor = MotorDriver(pwm_pin=33, dir_pin=29)
         
-        print("Motor Forward 50%")
-        motor.set_speed(50)
+        print("Motor Forward 80%")
+        motor.set_speed(80)
         time.sleep(2)
         
         print("Motor Stop")
         motor.stop()
         time.sleep(1)
         
-        print("Motor Backward 50%")
-        motor.set_speed(-50)
+        print("Motor Backward 80%")
+        motor.set_speed(-80)
         time.sleep(2)
         
         print("Motor Stop")
