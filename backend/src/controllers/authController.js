@@ -19,7 +19,7 @@ authController = (req,res) => {
         role : user.role
     };
     const token = jwt.sign(payload, JWT_SECRET, {expiresIn: '1h'});
-    res.json({message: 'login successful', token});
+    res.json({message: 'login successful',username: username, token});
 };
 
 module.exports = authController;
