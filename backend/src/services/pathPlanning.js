@@ -71,6 +71,7 @@ function aStarSearch(startId, goalId) {
 }
 
 function tripPlanning(start, destination) {
+  /*
   // find nearest node to start and destination
   const nodes = hdmap.getNodes();
   let startId = null, goalId = null;
@@ -88,19 +89,23 @@ function tripPlanning(start, destination) {
       goalId = n.id;
     }
   }
-
+  */
+  //get places ids
+  startId = hdmap.getPlaceId(start);
+  goalId = hdmap.getPlaceId(destination);
+  if (startId === null || goalId === null) return null;
   // use a star search
   const path = aStarSearch(startId, goalId) || [];
 
   // get poses to send to car
   const poses = [];
-  poses.push(start);
+  //poses.push(start);
   for (const nodeId of path) {
     const node = hdmap.getNodeById(nodeId);
     if (!node) continue;
     poses.push({ lat: node.lat, lng: node.lng });
   }
-  poses.push(destination);
+  //poses.push(destination);
   return poses;
 }
 

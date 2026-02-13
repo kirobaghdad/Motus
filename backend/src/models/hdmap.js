@@ -9,6 +9,12 @@ class HDMap {
       if (n && n.id != null) this.nodeMap.set(n.id, n);
     }
 
+    // Map place name -> node object for quick lookup
+    this.places = new Map();
+    for (const n of this.nodes) {
+      if (n && n.place != null) this.places.set(n.place, n);
+    }
+
     // Build adjacency lists for every node:
     // { incoming: [...edges], outgoing: [...edges], all: [...edges] }
     this.nodeEdges = {};
@@ -77,6 +83,14 @@ class HDMap {
     } else {
       return null;
     }
+  }
+
+  // get place id
+  getPlaceId(name){
+    if (!name) return null;
+    const node = this.places.get(name);
+    if (!node) return null;
+    return node.id;
   }
 }
 

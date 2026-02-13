@@ -5,7 +5,7 @@ const tripController = async (req, res) => {
 
     console.log("Received trip request:", req.body);
     try {
-        const { start, destination, carId } = req.body;
+        const { start, destination} = req.body;
 
         // Validation (Check if data exists)
         if (!destination || !start) {
@@ -17,6 +17,10 @@ const tripController = async (req, res) => {
         // Call PathPlanning service here
         const poses = tripPlanning(start, destination);
 
+        if (poses === null || poses === undefined){
+            return res.status(500).json({message: "trip canceled can not find path"});
+        }
+
         // Build payload to send to car(s)
         const payload = {
             tripId: Date.now().toString(),
@@ -27,14 +31,10 @@ const tripController = async (req, res) => {
 
         // Get io from express app and send to target car if known
         const io = req.app.get('io');
-        if (io && carId && io.carSockets && io.carSockets.has(carId)) {
-            const socketId = io.carSockets.get(carId);
-            io.to(socketId).emit('sub-goals', payload);
-            console.log(`Sent sub-goals to car ${carId} (${socketId})`);
-        } else if (io) {
+        if (io) {
             // broadcast if no specific carId provided or not connected
             io.emit('sub-goals', payload);
-            console.log('Broadcasted sub-goals to all connected devices');
+            console.log('send sub-goals to car');
         } else {
             console.warn('Socket.io not available on app; cannot send sub-goals');
         }
