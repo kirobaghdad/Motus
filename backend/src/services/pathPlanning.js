@@ -3,8 +3,9 @@ const HDMap = require('../models/hdmap');
 const PriorityQueue = require('../utils/priorityQueue');
 
 // Load HD map once (from config)
-const data = loadMap("../config/hdmap.json");
-const hdmap = new HDMap(data);
+//const data = loadMap("../config/hdmap.json");
+//const hdmap = new HDMap(data);
+const hdmap = require('../globals/mapState');
 
 // Simple straight-line heuristic using lat/lng (approx Euclidean)
 function heuristic(nodeA, nodeB) {
