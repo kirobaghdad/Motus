@@ -5,7 +5,7 @@ import 'package:motus/core/constants/constants.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);
   Future<UserModel> register(String username, String email, String password);
-  Future<void> logout(String token);
+  Future<void> logout();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -39,8 +39,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> logout(String token) {
-    // TODO: implement Logout
-    throw UnimplementedError();
+  Future<void> logout() async {
+    await dio.post('$baseUrl/logout');
   }
 }

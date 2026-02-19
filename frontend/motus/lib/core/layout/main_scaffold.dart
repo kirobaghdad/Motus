@@ -25,6 +25,12 @@ class MainScaffold extends StatelessWidget {
 
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: "book",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.route), label: "trips"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
