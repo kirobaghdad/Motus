@@ -49,7 +49,7 @@
 - res.body : message
 
 # 6- edit profile
-- method : UPDATE
+- method : POST
 - route : /edit/profile
 - req.body : json { username:value, email:value }
 - res.body : json { username: new value, token:new one}

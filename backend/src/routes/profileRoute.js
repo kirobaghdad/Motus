@@ -4,6 +4,6 @@ const profileController = require('../controllers/profileController');
 const authenticateJWT = require('../middleware/authentication');
 
 router.get('/profile',authenticateJWT,profileController.getProfile);
-router.update('/edit/profile',authenticateJWT,profileController.editProfile);
+router.post('/edit/profile',authenticateJWT,profileController.editProfile);
 
 module.exports = router;

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
+const placesController = require('../controllers/placesController');
 
-router.get('/popular-destination',authController);
-router.get('/places',authController);
-router.get('/map',authController);
+router.get('/popular-destination',placesController.getPopularPlaces);
+router.get('/places',placesController.getPlaces);
+router.get('/map',placesController.getMap);
+
 
 module.exports = router;

@@ -10,7 +10,7 @@ const tripController = {
             const { startLocation, destination, tripDateTime} = req.body;
 
             // Validation (Check if data exists)
-            if (!destination || !start || !tripDateTime) {
+            if (!destination || !startLocation || !tripDateTime) {
                 return res.status(400).json({ message: "Missing destination or start location or date" });
             }
             /*
@@ -41,12 +41,12 @@ const tripController = {
                 console.warn('Socket.io not available on app; cannot send sub-goals');
             }
             */
-           let state;
-           if (tripDateTime >= new Date()) {
-            state = "active";
-           } else {
-            state = "past";
-           }
+            let state;
+            if (tripDateTime >= new Date()) {
+                state = "active";
+            } else {
+                state = "past";
+            }
             newtrip = new tripSchema({
                 username: req.user.username,
                 tripDateTime: tripDateTime,

@@ -9,16 +9,16 @@ const registerController = async (req,res) => {
         if (!username || !password || !email){
             return res.status(401).json({message:"some or all data are missing"});
         }
-        userSchema.create({email,password,username});
+        await userSchema.create({email,password,username});
         const payload = {username,email};
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn: '24h'});
         await tokenSchema.create({
             username: username,
             token: token
         });
-        res.json({username: username, token: token});
+        return res.json({username: username, token: token});
         
-    } catch(error){
+    } catch(err){
         // Error code 11000 means a unique constraint was violated
         if (err.code === 11000) {
             return res.status(400).json({ 

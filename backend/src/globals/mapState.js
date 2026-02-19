@@ -1,4 +1,4 @@
-const maploader = require('../utils/maploader');
+const loadMap = require('../utils/hdmaploader');
 const HDMap = require('../models/hdmap');
 // Load HD map once (from config)
 const data = loadMap("../config/hdmap.json");
