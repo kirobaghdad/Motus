@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:motus/core/di/injection_container.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_event.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_state.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_event.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_state.dart';
 import 'package:motus/features/trips/presentation/widgets/trip_card.dart';
 
 class TripsPage extends StatelessWidget {

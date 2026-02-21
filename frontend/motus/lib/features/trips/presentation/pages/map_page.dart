@@ -10,11 +10,13 @@ class CampusMapPage extends StatelessWidget {
         child: Column(
           children: [
             Text('Campus Map'),
-            InteractiveViewer(
-              minScale: 1,
-              maxScale: 6,
-              boundaryMargin: const EdgeInsets.all(20),
-              child: Image.asset('assets/map.jpg', fit: BoxFit.contain),
+            Expanded(
+              child: InteractiveViewer(
+                minScale: 1,
+                maxScale: 6,
+                boundaryMargin: const EdgeInsets.all(20),
+                child: Image.asset('assets/map.jpg', fit: BoxFit.cover),
+              ),
             ),
           ],
         ),

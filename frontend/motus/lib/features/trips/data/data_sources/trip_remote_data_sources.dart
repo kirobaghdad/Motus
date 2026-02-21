@@ -89,6 +89,13 @@ class TripsRemoteDataSourceMock implements TripRemoteDataSource {
         tripDateTime: DateTime.now(),
         state: 'Live',
       ),
+      TripModel(
+        id: 2,
+        destination: "El-sawy",
+        startLocation: 'Main Gate',
+        tripDateTime: DateTime(2026, 2, 28, 7, 15, 0),
+        state: 'Active',
+      ),
     ];
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_event.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_state.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_event.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_state.dart';
 
 class StepDateTime extends StatelessWidget {
   const StepDateTime({super.key});

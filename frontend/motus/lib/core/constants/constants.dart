@@ -1,2 +1,1 @@
-
-const String baseUrl = 'https://api.openai.com/v1';
+const String baseUrl = 'http://10.0.2.2:3000';

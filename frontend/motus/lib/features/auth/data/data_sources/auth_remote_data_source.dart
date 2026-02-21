@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:motus/core/constants/constants.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login(String email, String password);
+  Future<UserModel> login(String username, String password);
   Future<UserModel> register(String username, String email, String password);
   Future<void> logout();
 }
@@ -13,11 +13,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.dio);
 
   @override
-  Future<UserModel> login(String email, String password) async {
+  Future<UserModel> login(String username, String password) async {
     try {
       final response = await dio.post(
         "$baseUrl/login",
-        data: {"email": email, "password": password},
+        data: {"username": username, "password": password},
       );
       return UserModel.fromJson(response.data);
     } catch (e) {

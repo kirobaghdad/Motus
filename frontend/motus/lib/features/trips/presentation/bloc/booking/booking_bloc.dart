@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:motus/features/trips/domain/usecases/book_trip_usecase.dart';
 import 'package:motus/features/trips/domain/usecases/get_locations_usecase.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_event.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_state.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_event.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_state.dart';
 
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final GetLocationsUsecase getLocationsUsecase;

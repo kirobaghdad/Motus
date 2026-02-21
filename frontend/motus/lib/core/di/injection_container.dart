@@ -17,8 +17,8 @@ import 'package:motus/features/trips/domain/repositories/trip_repository.dart';
 import 'package:motus/features/trips/domain/usecases/book_trip_usecase.dart';
 import 'package:motus/features/trips/domain/usecases/get_locations_usecase.dart';
 import 'package:motus/features/trips/domain/usecases/get_trips_usecase.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_bloc.dart';
 
 import '../../features/auth/data/data_sources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -55,7 +55,7 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<ProfileRemoteDataSource>(
-    () => ProfileRemoteDataSourceImplMock(sl()),
+    () => ProfileRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
@@ -73,7 +73,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
 
-  sl.registerFactory(() => AuthBloc(loginUsecase: sl(), registerUsecase: sl()));
+  sl.registerLazySingleton<AuthBloc>(
+    () => AuthBloc(registerUsecase: sl(), loginUsecase: sl()),
+  );
+
   sl.registerFactory(
     () => BookingBloc(getLocationsUsecase: sl(), bookTripUsecase: sl()),
   );

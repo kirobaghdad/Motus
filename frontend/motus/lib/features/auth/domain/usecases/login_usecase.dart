@@ -6,17 +6,14 @@ class LoginUsecase {
 
   LoginUsecase(this.authRepo);
 
-  Future<User> call(String email, String password) async {
-    if(email.isEmpty || password.isEmpty) {
-      throw Exception("Email and password cannot be empty");
+  Future<User> call(String username, String password) async {
+    if (username.isEmpty || password.isEmpty) {
+      throw Exception("username and password cannot be empty");
     }
-    if(!email.contains("@")) {
-      throw Exception("Invalid email");
-    }
-    if(password.length < 6) {
+    if (password.length < 6) {
       throw Exception("Password must be at least 6 characters");
     }
-    return await authRepo.login(email, password);
+    final User user = await authRepo.login(username, password);
+    return user;
   }
-
 }

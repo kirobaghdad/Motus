@@ -27,10 +27,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          String userName = 'Guest';
-          if (state is AuthSuccess) {
-            userName = state.user.username;
-          }
+          final userName = state is AuthSuccess ? state.user.username : 'Guest';
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

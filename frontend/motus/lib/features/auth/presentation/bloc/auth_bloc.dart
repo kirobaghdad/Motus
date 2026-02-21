@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:motus/core/di/injection_container.dart';
+import 'package:motus/core/storage/token_storage.dart';
 import 'package:motus/features/auth/domain/entities/user.dart';
 import 'package:motus/features/auth/domain/usecases/login_usecase.dart';
 import 'package:motus/features/auth/domain/usecases/register_usecase.dart';
@@ -21,7 +23,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogin(LoginRequest event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final User user = await loginUsecase(event.email, event.password);
+      final User user = await loginUsecase(event.username, event.password);
+      final token = await sl<TokenStorage>().saveToken(user.token);
       emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthFailure(e.toString()));

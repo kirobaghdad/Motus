@@ -8,8 +8,8 @@ import 'package:motus/features/home/presentation/pages/home_page.dart';
 import 'package:motus/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:motus/features/profile/presentation/bloc/profile_event.dart';
 import 'package:motus/features/profile/presentation/pages/profile_page.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_bloc.dart';
 import 'package:motus/features/trips/presentation/pages/book_trip.dart';
 import 'package:motus/features/trips/presentation/pages/map_page.dart';
 import 'package:motus/features/trips/presentation/pages/trips_page.dart';
@@ -20,7 +20,7 @@ class AppRoutes {
   static GoRouter appRouter = GoRouter(
     routes: [
       GoRoute(
-        path: '/login',
+        path: '/',
         builder: (context, state) => BlocProvider(
           create: (context) => sl<AuthBloc>(),
           child: LoginPage(),
@@ -41,11 +41,8 @@ class AppRoutes {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/',
-                builder: (context, state) => BlocProvider(
-                  create: (context) => sl<AuthBloc>(),
-                  child: const HomePage(),
-                ),
+                path: '/home',
+                builder: (context, state) => const HomePage(),
               ),
             ],
           ),

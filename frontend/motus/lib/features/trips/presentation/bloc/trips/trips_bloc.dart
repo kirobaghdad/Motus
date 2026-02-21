@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:motus/features/trips/domain/entities/trip.dart';
 import 'package:motus/features/trips/domain/usecases/get_trips_usecase.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_event.dart';
-import 'package:motus/features/trips/presentation/bloc/trips_state.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_event.dart';
+import 'package:motus/features/trips/presentation/bloc/trips/trips_state.dart';
 
 class TripsBloc extends Bloc<TripsEvent, TripsState> {
   final GetTripsUseCase getTripsUsecase;

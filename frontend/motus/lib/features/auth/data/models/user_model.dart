@@ -1,12 +1,8 @@
 import 'package:motus/features/auth/domain/entities/user.dart';
 
 class UserModel extends User {
-  UserModel({
-    required super.username,
-    required super.email,
-    required super.token,
-  });
-    
+  UserModel({required super.username, super.email, required super.token});
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       username: json['username'],

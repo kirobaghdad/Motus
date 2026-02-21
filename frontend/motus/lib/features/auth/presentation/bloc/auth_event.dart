@@ -1,10 +1,10 @@
 class AuthEvent {}
 
 class LoginRequest extends AuthEvent {
-  final String email;
+  final String username;
   final String password;
 
-  LoginRequest({required this.email, required this.password});
+  LoginRequest({required this.username, required this.password});
 }
 
 class RegisterRequest extends AuthEvent {

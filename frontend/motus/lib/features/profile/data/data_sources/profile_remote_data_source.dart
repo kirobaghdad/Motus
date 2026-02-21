@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:motus/core/constants/constants.dart';
 import '../models/profile_model.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -14,13 +15,20 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<ProfileModel> getProfile() async {
-    final response = await dio.get('/profile');
-    return ProfileModel.fromJson(response.data);
+    try {
+      final response = await dio.get('$baseUrl/profile');
+      return ProfileModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
   }
 
   @override
   Future<ProfileModel> updateProfile(String username) async {
-    final response = await dio.put('/profile', data: {'username': username});
+    final response = await dio.put(
+      '$baseUrl/edit/profile',
+      data: {'username': username},
+    );
 
     return ProfileModel.fromJson(response.data);
   }
@@ -28,31 +36,5 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> logout() async {
     await dio.post('/logout');
-  }
-}
-
-class ProfileRemoteDataSourceImplMock implements ProfileRemoteDataSource {
-  final Dio dio;
-
-  ProfileRemoteDataSourceImplMock(this.dio);
-
-  @override
-  Future<ProfileModel> getProfile() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return ProfileModel(
-      username: 'Rawan Ahmed',
-      email: 'rawan.a.anber@gmail.com',
-    );
-  }
-
-  @override
-  Future<ProfileModel> updateProfile(String username) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return ProfileModel(username: username, email: 'rawan.a.anber@gmail.com');
-  }
-
-  @override
-  Future<void> logout() async {
-    await Future.delayed(const Duration(seconds: 1));
   }
 }

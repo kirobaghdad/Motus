@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:motus/features/auth/presentation/widgets/app_button.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_bloc.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_event.dart';
-import 'package:motus/features/trips/presentation/bloc/booking_state.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_bloc.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_event.dart';
+import 'package:motus/features/trips/presentation/bloc/booking/booking_state.dart';
 import 'package:motus/features/trips/presentation/widgets/trip_card.dart';
 
 class StepConfirmation extends StatelessWidget {
