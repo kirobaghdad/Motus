@@ -42,7 +42,8 @@ const tripController = {
             }
             */
             let state;
-            if (tripDateTime >= new Date()) {
+            const now = new Date();
+            if (tripDateTime >= new Date(now.getTime()- 15*60*1000)) {
                 state = "active";
             } else {
                 state = "past";

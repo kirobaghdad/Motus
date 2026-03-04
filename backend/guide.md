@@ -4,16 +4,16 @@
 
 1- to connect with server use sockect.io-client package
 2- socket = io(server Link) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
-3- room to publish your pose is "car-position" {lat,lng} consider lat is x and lng is y
-4- room to recieve path of travel is "path" Array of {lat,lng}
+3- event to publish your pose is "car-position" {lat,lng,code} consider lat is x and lng is y
+4- event to recieve path of travel is "path" Array of {lat,lng}
 
 # second for mobile app
 
 1- you got live location from socket also 
   I- to connect with server use sockect.io-client package
-  II- socket = io(server Link) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
-  III- room to get new car pose is "car-position" {x,y} pixel position in image
-  IV- for now path will be on room "path-display"
+  II- socket = io(server Link,) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
+  III- event to get new car pose is "update-car-position" {x,y} pixel position in image
+  IV- for now path will be on event "path-display"
 
 2- for remaining tasks use http request 
 
