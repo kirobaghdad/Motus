@@ -1,6 +1,7 @@
 const loadMap = require('../utils/hdmapLoader');
 const HDMap = require('../models/hdmap');
 const PriorityQueue = require('../utils/priorityQueue');
+const getCarState = require('../globals/carState')
 
 // Load HD map once (from config)
 //const data = loadMap("../config/hdmap.json");
@@ -14,13 +15,14 @@ function heuristic(nodeA, nodeB) {
   const dy = nodeA.lng - nodeB.lng;
   return Math.sqrt(dx * dx + dy * dy);
 }
-
+/*
 function distance(pose, node) {
   if (!node || !pose) return 0;
   const dx = node.lat - pose.lat;
   const dy = node.lng - pose.lng;
   return Math.sqrt(dx * dx + dy * dy);
 }
+*/
 
 // A* search on the HDMap between node ids
 // Returns array of nodeIds from start -> goal or null if no path
@@ -91,17 +93,32 @@ function tripPlanning(start, destination) {
     }
   }
   */
+  // get path from car to start
+  const carState = getCarState()
+  const carpose = {lat:carState.lat,lng:carState.lng};
+  const nearestNode = hdmap.getNearestNode(carpose);
+  if (nearestNode === null){
+    return null;
+  }
   //get places ids
-  startId = hdmap.getPlaceId(start);
-  goalId = hdmap.getPlaceId(destination);
+  const startId = hdmap.getPlaceId(start);
+  const goalId = hdmap.getPlaceId(destination);
   if (startId === null || goalId === null) return null;
   // use a star search
-  const path = aStarSearch(startId, goalId) || [];
-
+  const path1 = aStarSearch(nearestNode.id, startId);
+  const path2 = aStarSearch(startId, goalId);
+  if (path1 === null || path2 === null){
+    return null;
+  }
   // get poses to send to car
   const poses = [];
   //poses.push(start);
-  for (const nodeId of path) {
+  for (const nodeId of path1) {
+    const node = hdmap.getNodeById(nodeId);
+    if (!node) continue;
+    poses.push({ lat: node.lat, lng: node.lng });
+  }
+  for (const nodeId of path2) {
     const node = hdmap.getNodeById(nodeId);
     if (!node) continue;
     poses.push({ lat: node.lat, lng: node.lng });
@@ -110,4 +127,4 @@ function tripPlanning(start, destination) {
   return poses;
 }
 
-module.exports = { tripPlanning };
+module.exports = { tripPlanning};

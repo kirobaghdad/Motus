@@ -92,6 +92,24 @@ class HDMap {
     if (!node) return null;
     return node.id;
   }
+
+  getNearestNode(pose){
+    if (pose === null || pose === undefined){
+      return null;
+    }
+    let nearestNode;
+    let minD = Infinity;
+    for(const node of this.nodes){
+      const dx = node.lat - pose.lat;
+      const dy = node.lng - pose.lng;
+      d = (dx * dx + dy * dy);
+      if(d < minD){
+        nearestNode = node;
+        minD = d;  
+      }  
+    }
+    return nearestNode;
+  }
 }
 
 module.exports = HDMap;
