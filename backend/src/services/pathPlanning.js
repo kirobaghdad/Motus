@@ -1,28 +1,15 @@
-const loadMap = require('../utils/hdmapLoader');
-const HDMap = require('../models/hdmap');
 const PriorityQueue = require('../utils/priorityQueue');
-const getCarState = require('../globals/carState')
 
-// Load HD map once (from config)
-//const data = loadMap("../config/hdmap.json");
-//const hdmap = new HDMap(data);
+const getCarState = require('../globals/carState')
 const hdmap = require('../globals/mapState');
 
-// Simple straight-line heuristic using lat/lng (approx Euclidean)
+// Euclidean distance heuristic for A*
 function heuristic(nodeA, nodeB) {
   if (!nodeA || !nodeB) return 0;
-  const dx = nodeA.lat - nodeB.lat;
-  const dy = nodeA.lng - nodeB.lng;
+  const dx = nodeA.x - nodeB.x;
+  const dy = nodeA.y - nodeB.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
-/*
-function distance(pose, node) {
-  if (!node || !pose) return 0;
-  const dx = node.lat - pose.lat;
-  const dy = node.lng - pose.lng;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-*/
 
 // A* search on the HDMap between node ids
 // Returns array of nodeIds from start -> goal or null if no path
@@ -74,29 +61,16 @@ function aStarSearch(startId, goalId) {
 }
 
 function tripPlanning(start, destination) {
-  /*
-  // find nearest node to start and destination
-  const nodes = hdmap.getNodes();
-  let startId = null, goalId = null;
-  let ds = Infinity, dg = Infinity;
-
-  for (const n of nodes) {
-    const dStart = distance(start, n);
-    if (dStart < ds) {
-      ds = dStart;
-      startId = n.id;
-    }
-    const dGoal = distance(destination, n);
-    if (dGoal < dg) {
-      dg = dGoal;
-      goalId = n.id;
-    }
-  }
-  */
-  // get path from car to start
+  // get car pose and find nearest node
   const carState = getCarState()
-  const carpose = {lat:carState.lat,lng:carState.lng};
-  const nearestNode = hdmap.getNearestNode(carpose);
+  const carpose = {x:carState.x,y:carState.y};
+  const region = hdmap.findRegion(carpose);
+  let nearestNode = null;
+  if (region) {
+    nearestNode = region.entrance_node_id;
+  } else {
+    nearestNode = hdmap.getNearestNode(carpose);
+  }
   if (nearestNode === null){
     return null;
   }
@@ -105,25 +79,25 @@ function tripPlanning(start, destination) {
   const goalId = hdmap.getPlaceId(destination);
   if (startId === null || goalId === null) return null;
   // use a star search
-  const path1 = aStarSearch(nearestNode.id, startId);
+  const path1 = aStarSearch(nearestNode, startId);
   const path2 = aStarSearch(startId, goalId);
   if (path1 === null || path2 === null){
     return null;
   }
   // get poses to send to car
+  // remove duplicate start node
+  path1.pop();
   const poses = [];
-  //poses.push(start);
   for (const nodeId of path1) {
     const node = hdmap.getNodeById(nodeId);
     if (!node) continue;
-    poses.push({ lat: node.lat, lng: node.lng });
+    poses.push({ x: node.x, y: node.y });
   }
   for (const nodeId of path2) {
     const node = hdmap.getNodeById(nodeId);
     if (!node) continue;
-    poses.push({ lat: node.lat, lng: node.lng });
+    poses.push({ x: node.x, y: node.y });
   }
-  //poses.push(destination);
   return poses;
 }
 

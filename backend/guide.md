@@ -4,8 +4,9 @@
 
 1- to connect with server use sockect.io-client package
 2- socket = io(server Link) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
-3- event to publish your pose is "car-position" {lat,lng,code} consider lat is x and lng is y
-4- event to recieve path of travel is "path" Array of {lat,lng}
+3- event to publish your pose is "car-position" {x,y,code} consider lat is x and lng is y
+4- event to recieve path of travel is "path" Array of {x,y}
+5- event to publish finshed trips is "finished" tripId
 
 # second for mobile app
 

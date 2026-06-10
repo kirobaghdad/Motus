@@ -11,7 +11,10 @@ cron.schedule('* * * * *', async () => {
     
     // Find trips where time is NOW (or slightly past) and status is 'pending'
     const dueTrips = await tripSchema.find({
-        tripDateTime: { $lte: now },
+        tripDateTime: { 
+            $gte: new Date(now-60000),
+            $lte: new Date(now+60000)
+        },
         state: 'active'
     });
 
@@ -39,7 +42,6 @@ cron.schedule('* * * * *', async () => {
         // Get io from express app and send to target car if known
         const io = req.app.get('io');
         if (io) {
-            // broadcast if no specific carId provided or not connected
             io.emit('path', payload);
             console.log('send sub-goals to car');
         } else {

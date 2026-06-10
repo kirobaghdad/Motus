@@ -1,12 +1,12 @@
 const carState = {
-    lat : 0,
-    lng : 0,
+    x : 0,
+    y : 0,
     vacant : true
 };
 
-function updateCarPose(lat,lng){
-    carState.lat = lat;
-    carState.lng = lng;
+function updateCarPose(x,y){
+    carState.x = x;
+    carState.y = y;
 }
 
 function updateCarState(state){

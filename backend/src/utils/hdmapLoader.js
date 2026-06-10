@@ -1,6 +1,3 @@
-// src/utils/hdmapLoader.js
-// Lightweight loader + helpers for the HD map (reads config/hdmap.json)
-
 const fs = require('fs');
 const path = require('path');
 
