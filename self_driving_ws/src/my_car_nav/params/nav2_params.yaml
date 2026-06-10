@@ -1,0 +1,105 @@
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      global_frame: odom
+      robot_base_frame: base_link
+      rolling_window: true
+      width: 3
+      height: 3
+      resolution: 0.2
+      plugins: ["voxel_layer", "inflation_layer"]
+      
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: True
+        observation_sources: pointcloud_source
+        pointcloud_source:
+          topic: cloud_map        # FIX: Use your corrected topic name
+          data_type: "PointCloud2"
+          marking: True
+          clearing: True
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.02
+          obstacle_max_range: 2.5 # NEW: Don't trust points further than 2.5m
+          obstacle_min_range: 0.0 # NEW: Trust points right in front of the car
+          raytrace_max_range: 3.0 # NEW: How far to "clear" empty space
+          raytrace_min_range: 0.0
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55    # Set this to slightly wider than your car!
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      global_frame: map          # Anchored to the map, not the car
+      robot_base_frame: base_link
+      use_sim_time: false        # Set to true if testing in Gazebo
+      robot_radius: 0.3         # Adjust based on your car's actual size
+      resolution: 0.2
+      track_unknown_space: true
+      rolling_window: false      # Global map stays static
+
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True # Matches your C++ QoS!
+        enabled: True
+        subscribe_to_updates: True
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: pointcloud_source
+        pointcloud_source:
+          topic: cloud_map       # Your renamed topic
+          data_type: "PointCloud2"
+          marking: True
+          clearing: True
+          max_obstacle_height: 2.0
+          min_obstacle_height: 0.02
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.7    # Higher than local for extra safety in global plans
+controller_server:
+  ros__parameters:
+    controller_plugins: ["FollowPath"]
+    FollowPath:
+      plugin: "dwb_core::DWBLocalPlanner"
+      # --- ADD THESE CRITICS ---
+      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      BaseObstacle.scale: 0.02
+      PathDefault.scale: 32.0
+      GoalDefault.scale: 24.0
+      # -------------------------
+      # Robot limits (Adjust these to your car's speed)
+      max_vel_x: 0.26
+      min_vel_x: 0.0
+      max_vel_theta: 1.0
+      acc_lim_x: 2.5
+      acc_lim_theta: 3.2
+      decel_lim_x: -2.5
+      decel_lim_theta: -3.2
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["goal_checker"]
+    
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 10.0
+    
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
