@@ -1,0 +1,84 @@
+# 1 -> make it before using ros2
+source /opt/ros/humble/setup.bash
+# 2 -> important github repo
+ https://github.com/Robotisim/ros2_learners
+# 3 -> creating workspace
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+# cd if you're still in the ``src`` directory with the ``ros_tutorials`` clone
+cd ..
+rosdep install -i --from-path src --rosdistro humble-y
+colcon build
+--packages-up-to builds the package you want, plus all its dependencies, but not the whole workspace (saves time)
+--symlink-install saves you from having to rebuild every time you tweak python scripts
+--event-handlers console_direct+ shows console output while building (can otherwise be found in the log directory)
+cd ~/my_robot_ws/src
+ros2 pkg create --build-type ament_cmake my_robot_nav --dependencies rclcpp nav2_msgs sensor_msgs
+cd ~/my_robot_ws
+colcon build --symlink-install
+source install/setup.bash
+ros2 run my_car_nav dummy_cp.py
+ros2 run my_car_nav pointcloud_to_gridoccupancy
+chmod +x src/my_car_nav/src/dummy_cp.py inside src of package
+--------------------------
+/cmd_vel --> puplish command [geometry_msgs/msg/Twist]
+/map --> listen to map [nav_msgs/msg/OccupancyGrid]
+/initialpose --> initial pose [geometry_msgs/msg/PoseWithCovarianceStamped]
+/amcl --> localize node
+/goal_pose [geometry_msgs/msg/PoseStamped]
+/scan [sensor_msgs/msg/LaserScan]
+/tf [tf2_msgs/msg/TFMessage]
+/mobile_base/sensors/bumper_pointcloud [sensor_msgs/msg/PointCloud2]
+/odom [nav_msgs/msg/Odometry]
+/map_updates [map_msgs/msg/OccupancyGridUpdate]
+currecnt pose --> [geometry_msgs/msg/PoseStamped]
+ros2 launch nav2_bringup
+ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 odom base_link
+-------------------
+source /opt/ros/humble/setup.bash
+export TURTLEBOT3_MODEL=waffle  # Iron and older only with Gazebo Classic
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
+# Iron and older only with Gazebo Classic
+------------------------------
+go build -o /bin/node node/data_keeper.go 
+-------------------------
+ros2 topic list -t
+ros2 topic list
+ros2 topic type <topic_name>
+ros2 interface show <msg_type>
+rqt_graph --> see graph of nodes and topics and how they are connected
+ros2 run rviz2 rviz2
+------------------------
+Node(
+    package='nav2_lifecycle_manager',
+    executable='lifecycle_manager',
+    name='lifecycle_manager_navigation',
+    output='screen',
+    parameters=[{'use_sim_time': False},
+                {'autostart': True}, # This automatically "flips the switch"
+                {'node_names': ['map_server', 'amcl', 'world_model', 'bt_navigator', 'waypoint_follower']}]
+)
+# This bridges the gap so Nav2 thinks the robot is alive
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 odom base_link
+ros2 run pcl_ros pcd_to_pointcloud --ros-args \
+  -p file_name:=/home/ali/Downloads/your_file.pcd \
+  -p frame_id:=map \
+  -p interval:=1.0 \
+  -r cloud_pcd:=/cloud_map
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+ros2 run turtlebot3_teleop teleop_keyboard
+ros2 topic echo /cloud_map --truncate_length 10 --qos-reliability best_effort --qos-durability volatile
+ros2 topic echo /cloud_map --field data
+/home/ali/self_driving_ws/src/my_car_nav/maps/biwi_hotel_train.txt
+/home/ali/self_driving_ws/src/my_car_nav/maps/Town01_seq0000.txt
+ros2 topic echo /cmd_vel
+# launching nav2
+ros2 launch my_car_nav nav2_vslam_launch.py params_file:=/home/ali/self_driving_ws/src/my_car_nav/params/nav2_params2.yaml use_sim_time:=true
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: 'map'}, pose: {position: {x: 2.0, y: 0.5, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
+echo '{"x": 1.5, "y": 0.5}' | nc CAR_IP_ADDRESS 5000
+# launch robot with camera
+export TURTLEBOT3_MODEL=waffle_pi
+ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
+sudo apt install ros-humble-pointcloud-to-laserscan
