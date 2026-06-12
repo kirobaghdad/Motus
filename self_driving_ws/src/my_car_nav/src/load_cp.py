@@ -8,7 +8,7 @@ import std_msgs.msg
 class VirtualSensor(Node):
     def __init__(self):
         super().__init__('virtual_sensor')
-        self.publisher_ = self.create_publisher(PointCloud2, 'cloud_map', 10)
+        self.publisher_ = self.create_publisher(PointCloud2, 'cloud_point', 10)
         self.timer = self.create_timer(1.0, self.publish_cloud)
         self.declare_parameter('file_path', '')
         # --- CONFIGURATION ---

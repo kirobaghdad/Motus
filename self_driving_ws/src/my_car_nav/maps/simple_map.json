@@ -1,0 +1,66 @@
+{
+    "objects": [
+        {
+            "point": [
+                0,
+                0
+            ],
+            "height": 1,
+            "x_width": 10,
+            "y_width": 0.5
+        },
+        {
+            "point": [
+                0,
+                0.5
+            ],
+            "height": 1,
+            "x_width": 0.5,
+            "y_width": 9
+        },
+        {
+            "point": [
+                0,
+                9.5
+            ],
+            "height": 1,
+            "x_width": 10,
+            "y_width": 0.5
+        },
+        {
+            "point": [
+                9.5,
+                0.5
+            ],
+            "height": 1,
+            "x_width": 0.5,
+            "y_width": 9
+        },
+        {
+            "point": [
+                4.5,
+                0.5
+            ],
+            "height": 1,
+            "x_width": 1,
+            "y_width": 4
+        },
+        {
+            "point": [
+                4.5,
+                5.5
+            ],
+            "height": 1,
+            "x_width": 1,
+            "y_width": 4
+        }
+    ],
+    "car_width": 0.2,
+    "car_length": 0.3,
+    "car_pose": [
+        5,
+        5,
+        0.2,
+        0
+    ]
+}

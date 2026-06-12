@@ -1,0 +1,17 @@
+from sensor_msgs.msg import PointField
+from sensor_msgs_py import point_cloud2 # For ROS2 (use sensor_msgs.point_cloud2 in ROS1)
+import std_msgs.msg
+
+# 1. Define the fields layout
+fields = [
+    PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+    PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+    PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1)
+]
+
+header = std_msgs.msg.Header()
+header.frame_id = "map"
+header.stamp = self.get_clock().now().to_msg()
+
+# 2. Let ROS handle the safe C-memory conversion seamlessly
+msg = point_cloud2.create_cloud(header, fields, translated_points.tolist())

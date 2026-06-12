@@ -82,3 +82,5 @@ echo '{"x": 1.5, "y": 0.5}' | nc CAR_IP_ADDRESS 5000
 export TURTLEBOT3_MODEL=waffle_pi
 ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
 sudo apt install ros-humble-pointcloud-to-laserscan
+ros2 run <package_name> <node_executable> --ros-args -p <parameter_name>:=<value>
+ros2 topic echo /your_pointcloud_topic --no-arr -n 1

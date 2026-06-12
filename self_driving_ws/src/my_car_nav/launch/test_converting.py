@@ -7,7 +7,7 @@ def generate_launch_description():
     # 1. Define the name of the argument
     path_arg = DeclareLaunchArgument(
         'map_path',
-        default_value='/home/ali/self_driving_ws/src/my_car_nav/maps/biwi_hotel_train.txt',
+        default_value='/home/ali/GP/Motus/self_driving_ws/src/my_car_nav/maps/cloud_points.txt',
         description='Full path to the pointcloud text file'
     )
 

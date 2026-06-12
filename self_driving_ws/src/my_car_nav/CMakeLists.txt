@@ -16,6 +16,28 @@ find_package(map_msgs REQUIRED)
 
 add_executable(pointcloud_to_gridoccupancy src/pointcloud_to_gridoccupancy.cpp)
 
+add_executable(path_planner src/path_planner.cpp)
+add_executable(path_planner2 src/path_planner2.py)
+add_executable(map_loader src/map_loader.cpp)
+
+ament_target_dependencies(path_planner
+  rclcpp
+  nav_msgs
+  geometry_msgs
+)
+
+ament_target_dependencies(path_planner2
+  rclpy
+  nav_msgs
+  geometry_msgs
+)
+
+ament_target_dependencies(map_loader
+  rclcpp
+  nav_msgs
+  geometry_msgs
+)
+
 ament_target_dependencies(pointcloud_to_gridoccupancy
   rclcpp
   nav_msgs
