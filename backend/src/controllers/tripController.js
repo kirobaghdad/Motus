@@ -1,4 +1,5 @@
 const tripSchema = require("../models/trip");
+const userSchema = require("../models/user");
 
 // Sample Controller for Trip Operations
 const tripController = {
@@ -11,7 +12,17 @@ const tripController = {
             if (!destination || !startLocation || !tripDateTime) {
                 return res.status(400).json({ message: "Missing destination or start location or date" });
             }
-
+            let user = await userSchema.findOne({username:req.user.username});
+            if (!user) {
+                return res.status(404).json({message: 'User not found'});
+            }
+            currentPopularPlaces = user.popularPlaces;
+            // Update popular places if not already in the list
+            if (!currentPopularPlaces.includes(destination)) {
+                currentPopularPlaces.push(destination);
+                user.popularPlaces = currentPopularPlaces;
+                await user.save();
+            }
             let state;
             const now = new Date();
             if (tripDateTime >= new Date(now.getTime()- 15*60*1000)) {

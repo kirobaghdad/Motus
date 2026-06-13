@@ -20,7 +20,7 @@ const placesController = {
         return res.status(200).json({places: places});
     },
     getMap: (req,res) =>{
-        return res.status(200).json({URL: "https://motus-map.s3.amazonaws.com/map.png"});
+        return res.status(200).json({URL: "https://alisamye.github.io/map/map.png"});
     }
 };
 

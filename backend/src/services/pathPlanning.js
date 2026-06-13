@@ -64,16 +64,11 @@ function tripPlanning(start, destination) {
   // get car pose and find nearest node
   const carState = getCarState()
   const carpose = {x:carState.x,y:carState.y};
-  const region = hdmap.findRegion(carpose);
-  let nearestNode = null;
-  if (region) {
-    nearestNode = region.entrance_node_id;
-  } else {
-    nearestNode = hdmap.getNearestNode(carpose);
-  }
-  if (nearestNode === null){
+  const nearestNodeEdge = hdmap.getNearestNode(carpose);
+  if (nearestNodeEdge === null){
     return null;
   }
+  const nearestNode = nearestNodeEdge.nodeId;
   //get places ids
   const startId = hdmap.getPlaceId(start);
   const goalId = hdmap.getPlaceId(destination);
@@ -83,6 +78,22 @@ function tripPlanning(start, destination) {
   const path2 = aStarSearch(startId, goalId);
   if (path1 === null || path2 === null){
     return null;
+  }
+  // optimize path1 by removing case when car go to nearest node and then astar say that other node in same edge is next node.
+  const nearestEdge = nearestNodeEdge.edge;
+  if (nearestEdge) {
+    if (nearestEdge === -1) {
+      // nearset node could be skiped and car go directly to next node remove first element of path1
+      path1.shift();
+    }
+    else {
+      neighborNodeID = hdmap.getNeighbour(nearestNode, nearestEdge);
+      if (neighborNodeID && path1[1] === neighborNodeID) {
+        // nearest node could be skiped and car go directly to next node remove first element of path1
+        path1.shift();
+      }
+
+    }
   }
   // get poses to send to car
   // remove duplicate start node
@@ -101,4 +112,14 @@ function tripPlanning(start, destination) {
   return poses;
 }
 
-module.exports = { tripPlanning};
+function getPath(start, destination) {
+  // check if start and destination are valid
+  if (!start || !destination) return null;
+  // check if start and destination are in regions or near to node
+  const startRegion = hdmap.findRegion(start);
+  const destRegion = hdmap.findRegion(destination);
+  
+  return tripPlanning(start, destination);
+}
+
+module.exports = { tripPlanning, getPath};

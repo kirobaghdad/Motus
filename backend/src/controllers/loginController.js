@@ -20,6 +20,10 @@ const loginController = {
         if (user.password !== password) {
             return res.status(401).json({message: 'wrong password'});
         }
+        const existingToken = await tokenSchema.findOne({username: username});
+        if (existingToken) {
+            return res.status(400).json({message: 'User already logged in'});
+        }
         const payload = {
             username : user.username,
             email : user.email

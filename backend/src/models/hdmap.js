@@ -90,6 +90,11 @@ class HDMap {
     if (pose === null || pose === undefined){
       return null;
     }
+    // first check if pose is inside any region, if so return entrance node
+    const region = this.findRegion(pose);
+    if (region) {
+      return {nodeId:region.entrance_node_id, edge: null};
+    }
     const sortedNodes = PriorityQueue();
     for(const node of this.nodes){
       const dx = node.x - pose.x;
@@ -102,7 +107,7 @@ class HDMap {
       const nodeId = node.key;
       const nodeObj = this.getNodeById(nodeId);
       if (Math.sqrt(node.priority) <= nodeObj.r) {
-        return nodeId;
+        return {nodeId: nodeId, edge: -1};
       }
       for (const edge of this.getIncomingEdges(nodeId)) {
         const neighborId = this.getNeighbour(nodeId, edge);
@@ -111,7 +116,7 @@ class HDMap {
         const dy = (nodeObj.y - neighborObj.y) * (nodeObj.y - pose.y);
         const dotProduct = dx + dy;
         if (dotProduct > 0) {
-          return nodeId;
+          return {nodeId: nodeId, edge: edge};
         }
       }
     }
