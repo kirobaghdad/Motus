@@ -150,7 +150,11 @@
 
   ],
   "block_size_in_foot": 5.255,
-  "foot_in_cm": 30,
+  "foot_in_meter": 0.3,
+  "image_width_in_pixel": 480,
+  "image_height_in_pixel": 180,
+  "map_width_in_block": 48,
+  "map_height_in_block": 18,
   "area_format": "rectangle (x, y, width, height) and repeat if there are more. x,y is the coordinate of the top-left corner",
   "notes": "if we use later lat and lng we may refer to lat as x and lng as y, so no changes would be made."
 }

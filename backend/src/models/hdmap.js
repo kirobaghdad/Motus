@@ -5,8 +5,9 @@ class HDMap {
     this.edges = Array.isArray(data.edges) ? data.edges : [];
     const places_arr = Array.isArray(data.places) ? data.places : [];
     this.regions = Array.isArray(data.regions) ? data.regions : [];
-    this.block_size = data.block_size_in_foot;
-    this.foot = data.foot_in_cm;
+    this.blockSizeInFoot = data.block_size_in_foot;
+    this.foot = data.foot_in_meter;
+    this.blockSizeInPixel = data.image_width_in_pixel / data.map_width_in_block;
 
     // Map nodeId -> node object for quick lookup
     this.nodeMap = new Map();
@@ -64,6 +65,18 @@ class HDMap {
 
   getOutgoingEdges(id) {
     return (this.nodeEdges[id] && this.nodeEdges[id].outgoing) || [];
+  }
+
+  getBlockSizeInFoot() {
+    return this.blockSizeInFoot;
+  }
+
+  getBlockSizeInPixel() {
+    return this.blockSizeInPixel;
+  }
+  
+  getFoot() {
+    return this.foot;
   }
 
   // Utility: get neighbor node id for a node
