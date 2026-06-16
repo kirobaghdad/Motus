@@ -16,4 +16,11 @@ public:
         RCLCPP_INFO(this->get_logger(), "PathPlanner Node started...");
         
     }
+};
+
+int main(int argc, char * argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<PathPlanner>());
+    rclcpp::shutdown();
+    return 0;
 }

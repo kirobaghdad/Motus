@@ -40,8 +40,6 @@ source /opt/ros/humble/setup.bash
 export TURTLEBOT3_MODEL=waffle  # Iron and older only with Gazebo Classic
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
 # Iron and older only with Gazebo Classic
-------------------------------
-go build -o /bin/node node/data_keeper.go 
 -------------------------
 ros2 topic list -t
 ros2 topic list

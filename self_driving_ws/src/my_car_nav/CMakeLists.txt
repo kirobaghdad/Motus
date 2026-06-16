@@ -13,28 +13,24 @@ find_package(geometry_msgs REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(map_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 
 add_executable(pointcloud_to_gridoccupancy src/pointcloud_to_gridoccupancy.cpp)
 
 add_executable(path_planner src/path_planner.cpp)
-add_executable(path_planner2 src/path_planner2.py)
 add_executable(map_loader src/map_loader.cpp)
 
 ament_target_dependencies(path_planner
   rclcpp
   nav_msgs
-  geometry_msgs
-)
-
-ament_target_dependencies(path_planner2
-  rclpy
-  nav_msgs
+  nav2_msgs
   geometry_msgs
 )
 
 ament_target_dependencies(map_loader
   rclcpp
   nav_msgs
+  sensor_msgs
   geometry_msgs
 )
 
@@ -43,6 +39,16 @@ ament_target_dependencies(pointcloud_to_gridoccupancy
   nav_msgs
   sensor_msgs
   geometry_msgs
+)
+
+install(TARGETS
+  map_loader
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  src/path_planner2.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 # 4. Install C++ executable
@@ -57,19 +63,19 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 5. Install Python scripts
+# 6. Install Python scripts
 install(PROGRAMS
   src/load_cp.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 6. Install Python scripts
+# 7. Install Python scripts
 install(PROGRAMS
   src/test_car.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 7. Install Launch, Maps, and Params folders
+# 8. Install Launch, Maps, and Params folders
 install(DIRECTORY
   launch
   maps

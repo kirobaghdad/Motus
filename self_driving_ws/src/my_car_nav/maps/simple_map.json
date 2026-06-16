@@ -1,66 +1,72 @@
 {
     "objects": [
         {
+            "id": 0,
             "point": [
-                0,
-                0
+                0.0,
+                0.0
             ],
-            "height": 1,
-            "x_width": 10,
+            "height": 1.0,
+            "x_width": 10.0,
             "y_width": 0.5
         },
         {
+            "id": 2,
             "point": [
-                0,
+                0.0,
                 0.5
             ],
-            "height": 1,
+            "height": 1.0,
             "x_width": 0.5,
-            "y_width": 9
+            "y_width": 9.0
         },
         {
+            "id": 1,
             "point": [
-                0,
+                0.0,
                 9.5
             ],
-            "height": 1,
-            "x_width": 10,
+            "height": 1.0,
+            "x_width": 10.0,
             "y_width": 0.5
         },
         {
+            "id": 3,
             "point": [
                 9.5,
                 0.5
             ],
-            "height": 1,
+            "height": 1.0,
             "x_width": 0.5,
-            "y_width": 9
+            "y_width": 9.0
         },
         {
+            "id": 4,
             "point": [
                 4.5,
                 0.5
             ],
-            "height": 1,
-            "x_width": 1,
-            "y_width": 4
+            "height": 1.0,
+            "x_width": 1.0,
+            "y_width": 3.0
         },
         {
+            "id": 5,
             "point": [
                 4.5,
-                5.5
+                6.5
             ],
-            "height": 1,
-            "x_width": 1,
-            "y_width": 4
+            "height": 1.0,
+            "x_width": 1.0,
+            "y_width": 3.0
         }
     ],
     "car_width": 0.2,
     "car_length": 0.3,
     "car_pose": [
-        5,
-        5,
+        2.5,
+        5.0,
         0.2,
-        0
+        0.0
     ]
 }
