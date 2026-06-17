@@ -2,19 +2,20 @@
 
 # first for car 
 
-1- to connect with server use sockect.io-client package
+1- to connect with server use sockect.io-client package join room "only-car"
 2- socket = io(server Link) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
 3- event to publish your pose is "car-position" {x,y,code} consider lat is x and lng is y
-4- event to recieve path of travel is "path" Array of {x,y}
-5- event to publish finshed trips is "finished" tripId
+4- event to recieve path of travel is "path" Array of {x,y} in meters poses and start and destination and trip id like mobile
+5- event to publish finshed trips is "finished-trips" tripId
 
 # second for mobile app
 
 1- you got live location from socket also 
   I- to connect with server use sockect.io-client package
   II- socket = io(server Link,) where server Link = http://localhost:3000 --> localhost may be replaced with IP address or domain name depend on case
-  III- event to get new car pose is "update-car-position" {x,y} pixel position in image
-  IV- for now path will be on event "path-display"
+  III- event to get new car pose is "update-car-position" {x,y} pixel position in image (room joined is 'all-users')
+  IV- for now path will be on event "path-display" (room joined is 'exact-username')
+  V- for canceled trips that has no valid path will be on event "canceled" {tripId}
 
 2- for remaining tasks use http request 
 
@@ -66,7 +67,7 @@
 # 8- book trip
 - method : POST
 - route : /book-trip
-- req.body : json {destination,startLocation,tripDateTime}
+- req.body : json {destination string,startLocation string,tripDateTime}
 - res.body : message
 
 # 9- delete trip
@@ -85,7 +86,13 @@
 - method : GET
 - route : /places
 - req.body : empty
-- res.body : Array of strings
+- res.body : json{ places: Array of strings}
+
+# 12- immediate trip
+- method : GET
+- route : /immediate-trip
+- req.body : json {destination: {x,y}, startLocation{x,y}} in meter
+- res.body : json {destination: {x,y}, startLocation{x,y},poses} in pixels
 
 
 

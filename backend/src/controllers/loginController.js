@@ -33,7 +33,7 @@ const loginController = {
             username: username,
             token: token
         });
-        res.json({username: username, token: token});
+        res.status(201).json({username: username, token: token});
     },
     logoutHandler: async (req,res) => {
         try {

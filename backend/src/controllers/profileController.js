@@ -8,7 +8,7 @@ const profileController = {
         try {
             const {username,email} = req.body;
             if(!username || !email){
-                return res.status(404).json({ message: "data not found" });
+                return res.status(400).json({ message: "data not found" });
             }
             const updatedData = {username,email};
             const updatedUser = await userSchema.findOneAndUpdate(
@@ -17,18 +17,21 @@ const profileController = {
                 {new: true},
             );
             if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
+                return res.status(404).json({ message: "User not found" });
             }
             const payload = {
                 username : username,
                 email : email
             };
             const token = jwt.sign(payload, JWT_SECRET, {expiresIn: '24h'});
-            await tokenSchema.findOneAndUpdate(
+            updatedToken = await tokenSchema.findOneAndUpdate(
                 {username: req.user.username},
                 {$set: {token: token}}
             );
-            res.json({username: username, token: token});
+            if (!updatedToken) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            res.status(201).json({username: username, token: token});
         } catch(err){
             // Error code 11000 means a unique constraint was violated
             if (err.code === 11000) {
@@ -41,7 +44,7 @@ const profileController = {
 
     },
     getProfile: (req,res) =>{
-        return res.status(201).json({
+        return res.status(200).json({
             email: req.user.email,
             username: req.user.username
         });

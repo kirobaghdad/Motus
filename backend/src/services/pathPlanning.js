@@ -232,4 +232,11 @@ function convertPosesToPixels(poses) {
   return convertedPoses;
 }
 
-module.exports = { tripPlanning, getPath, convertPosesTometers, convertPosesToPixels};
+function convertPoseFromMetersToPixels(pose) {
+  if (!pose) return null;
+  const blockSizeInPixel = hdmap.getBlockSizeInPixel();
+  const blockSizeInMeter = hdmap.getBlockSizeInFoot() * hdmap.getFoot();
+  return { x: (pose.x / blockSizeInMeter) * blockSizeInPixel, y: (pose.y / blockSizeInMeter) * blockSizeInPixel };
+}
+
+module.exports = { tripPlanning, getPath, convertPosesTometers, convertPosesToPixels, convertPoseFromMetersToPixels};

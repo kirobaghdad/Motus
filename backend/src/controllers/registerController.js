@@ -2,12 +2,18 @@ const tokenSchema = require("../models/token");
 const userSchema = require("../models/user"); 
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
+const car_username = process.env.CAR_USERNAME;
 
 const registerController = async (req,res) => {
     try {
         const {email,password,username} = req.body;
         if (!username || !password || !email){
             return res.status(401).json({message:"some or all data are missing"});
+        }
+        if (username === car_username) {
+            return res.status(400).json({ 
+                message: "Username already exists" 
+            });
         }
         await userSchema.create({email,password,username});
         const payload = {username,email};
@@ -16,7 +22,7 @@ const registerController = async (req,res) => {
             username: username,
             token: token
         });
-        return res.json({username: username, token: token});
+        return res.status(201).json({username: username, token: token});
         
     } catch(err){
         // Error code 11000 means a unique constraint was violated

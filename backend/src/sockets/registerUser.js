@@ -1,10 +1,19 @@
 const userSchema = require("../models/user"); 
+const car_username = process.env.CAR_USERNAME;
+const car_password = process.env.CAR_PASSWORD;
 
-module.exports = async (data,socketID) => {
+module.exports = async (data,socket,io) => {
     if(!data.username || !data.password){
         console.log("missing data, user not added to any room");
-    } else {
-        if(io.users.has(data.username)){
+        return;
+    }
+    if(io.users.has(data.username)){
+        return;
+    }
+    try {
+        if (data.username === car_username && data.password === CAR_PASSWORD) {
+            socket.join("only-car");
+            io.users.set(data.username,socket.id);
             return;
         }
         user = await userSchema.findOne({username: data.username});
@@ -16,9 +25,11 @@ module.exports = async (data,socketID) => {
             console.log("password is wrong");
         }
         // make user join room to recieve car position
-        socket.join("car_pose_pixel");
+        socket.join("all-users");
         // make user join room to recieve path
-        socket.join(`path_pixel_${data.username}`);
-        io.users.set(data.username,socketID);
+        socket.join(`exact-${data.username}`);
+        io.users.set(data.username,socket.id);
+    } catch (error) {
+        console.error("error in fetching user",error);
     }
 };

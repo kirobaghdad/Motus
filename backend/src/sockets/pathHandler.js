@@ -1,52 +1,90 @@
 const tripSchema = require("../models/trip"); 
-const { tripPlanning} = require("../services/pathPlanning");
+const {updateCarState,getCarState} = require("../globals/carState");
+const { tripPlanning, convertPosesToPixels, convertPosesTometers} = require("../services/pathPlanning");
 const cron = require('node-cron');
 
 
 
 
 // This runs every 1 minute
-cron.schedule('* * * * *', async () => {
-    const now = new Date();
+// schedule: ( minute hour monthDay month weekDay) * means every value
+module.exports = async (io) =>{
+    cron.schedule('* * * * *', async () => {
+        const now = Date.now();
     
-    // Find trips where time is NOW (or slightly past) and status is 'pending'
-    const dueTrips = await tripSchema.find({
-        tripDateTime: { 
-            $gte: new Date(now-60000),
-            $lte: new Date(now+60000)
-        },
-        state: 'active'
+        // Find trips where time is NOW (or slightly past) and status is 'pending'
+        const dueTrips = await tripSchema.find({
+            tripDateTime: { 
+                $lte: now
+            },
+            state: 'active'
+        });
+
+        for (let trip of dueTrips) {
+            if (trip.tripDateTime.getTime() < new Date(now - 5 * 60 * 1000)) {
+                // trip time has passed the tolerance time for delay
+                cancelTrip(trip, io);
+                continue;
+            }
+            if (!getCarState()) {
+                continue;
+            }
+            console.log(`Trip ${trip._id} is starting now!`);
+        
+            // Call PathPlanning service here
+            const poses = tripPlanning(trip.startLocation, trip.destination);
+
+            if (poses === null || poses === undefined){
+                cancelTrip(trip, io);
+                continue;
+            }
+
+            // Build payload to send to car
+            const payload1 = {
+                tripId: trip._id,
+                start: trip.startLocation,
+                destination: trip.destination,
+                poses: convertPosesTometers(poses)
+            };
+            // Build payload to send to mobile app
+            const payload2 = {
+                tripId: trip._id,
+                start: trip.startLocation,
+                destination: trip.destination,
+                poses: convertPosesToPixels(poses)
+            };
+
+            if (io) {
+                io.to('only-car').emit('path', payload1);
+                io.to(`exact-${trip.username}`).emit('path-display',payload2)
+                console.log('send sub-goals to car and mobile app');
+            } else {
+                console.warn('Socket.io not available on app; cannot send sub-goals');
+                cancelTrip(trip, io);
+                continue;
+            }
+
+            // update trip state to live
+            trip.state = 'live';
+            try {
+                await trip.save();
+            } catch (error) {
+                console.error("can not update canceled trip", error);
+            } 
+            updateCarState(false);
+        
+        }
     });
 
-    for (let trip of dueTrips) {
-        console.log(`Trip ${trip._id} is starting now!`);
-        
-        // 1. Update trip status so we don't process it again
-        trip.status = 'live';
+};
+
+async function cancelTrip (trip,io){
+    trip.state = 'past';
+    try {
         await trip.save();
-        // Call PathPlanning service here
-        const poses = tripPlanning(trip.startLocation, trip.destination);
-
-        if (poses === null || poses === undefined){
-            return res.status(500).json({message: "trip canceled can not find path"});
-        }
-
-        // Build payload to send to car(s)
-        const payload = {
-            tripId: trip._id,
-            start: trip.startLocation,
-            destination: trip.destination,
-            poses: poses
-        };
-
-        // Get io from express app and send to target car if known
-        const io = req.app.get('io');
-        if (io) {
-            io.emit('path', payload);
-            console.log('send sub-goals to car');
-        } else {
-            console.warn('Socket.io not available on app; cannot send sub-goals');
-        }
-        
+    } catch (error) {
+        console.error("can not update canceled trip", error);
     }
-});
+    io.to(`exact-${trip.username}`).emit('canceled',{tripId: trip._id})
+};
+

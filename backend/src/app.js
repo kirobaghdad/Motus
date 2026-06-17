@@ -34,7 +34,8 @@ app.use('/', profileRoute);
 app.set('io', io);
 
 // Register socket handlers
-require('./sockets/index')(io);
+require('./sockets/socketManager.js')(io);
+require('./sockets/pathHandler.js')(io);
 
 const PORT = 3000;
 server.listen(PORT, () => console.log(`Server on port ${PORT}`));
