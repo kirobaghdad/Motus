@@ -1,9 +1,20 @@
 const tripSchema = require("../models/trip");
 const userSchema = require("../models/user");
+const hdmap = require("../globals/mapState");
+const validator = require("../services/validation");
+const parsePose = require("../utils/parser");
 const {getPath, convertPosesTometers, convertPosesToPixels} = require("../services/pathPlanning");
 
 const tripController = {
     bookTrip: async (req, res) => {
+        expected_body = {
+            startLocation: "string",
+            destination: "string",
+            tripDateTime: "string"
+        };
+        if(!validator(req.body, expected_body)){
+            return res.status(400).json({message:"error in body format"});
+        }
         console.log("Received trip request:", req.body);
         try {
             const { startLocation, destination, tripDateTime} = req.body;
@@ -11,6 +22,11 @@ const tripController = {
             // Validation
             if (!destination || !startLocation || !tripDateTime) {
                 return res.status(400).json({ message: "Missing destination or start location or date" });
+            }
+            startPlace = hdmap.getPlaceByName(startLocation);
+            destPlace = hdmap.getPlaceByName(destination);
+            if (!startPlace || !destPlace) {
+                return res.status(400).json({message:"places not exist"});
             }
             let user = await userSchema.findOne({username:req.user.username});
             if (!user) {
@@ -53,6 +69,12 @@ const tripController = {
         }
     },
     deleteTrip: async (req, res) => { 
+        expected_body = {
+            id: "string"
+        };
+        if(!validator(req.body, expected_body)){
+            return res.status(400).json({message:"error in body format"});
+        }
         try {
             await tripSchema.findByIdAndUpdate(req.body.id, {state: "deleted"});
             return res.status(201).json({ message: "Trip deleted successfully" });
@@ -71,13 +93,28 @@ const tripController = {
         }
     },
     executeTrip: (req, res) => {
-        const { startLocation, destination} = req.body;
-        // Validation 
-        if (!destination || !startLocation) {
-            return res.status(400).json({ message: "Missing destination or start location or date" });
+        // validation first
+        expected_body = {
+            startLocation: "object",
+            destination: "object"
+        };
+        if(!validator(req.body, expected_body)){
+            return res.status(400).json({message:"error in body format"});
         }
-        if (!isPoseObject(startLocation) || !isPoseObject(destination))
-            return res.status(400).json({ message: "destination or start location are not in valid format" });
+        expected_body = {
+            x: "number",
+            y: "number"
+        };
+        if(!validator(req.body.startLocation, expected_body)){
+            return res.status(400).json({message:"error in body format"});
+        }
+        if(!validator(req.body.destination, expected_body)){
+            return res.status(400).json({message:"error in body format"});
+        }
+        // get path
+        const { startLocation, destination} = req.body;
+        startLocation = parsePose(startLocation);
+        destination = parsePose(destination);
         poses = getPath(startLocation, destination);
         // Build payload to send to car
         const payload1 = {
@@ -100,16 +137,6 @@ const tripController = {
         }
         return res.status(500).json({error:"can not send trip to car"});
     }
-};
-
-function isPoseObject(pose){
-    if (!pose)
-        return false;
-    if (typeof pose !== 'object')
-        return false;
-    if ("x" in pose && "y" in pose)
-        return true;
-    return false;
 };
 
 module.exports = tripController;

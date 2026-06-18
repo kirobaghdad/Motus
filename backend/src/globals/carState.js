@@ -13,6 +13,10 @@ function updateCarState(state){
     carState.vacant = state;
 }
 
+function getCarPose(){
+    return {x: carState.x, y: carState.y};
+}
+
 function getCarState(){return carState}
 
-module.exports = {updateCarPose,updateCarState,getCarState};
+module.exports = {updateCarPose,updateCarState,getCarState,getCarPose};

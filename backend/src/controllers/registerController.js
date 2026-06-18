@@ -1,10 +1,20 @@
 const tokenSchema = require("../models/token"); 
 const userSchema = require("../models/user"); 
+const validator = require("../services/validation");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const car_username = process.env.CAR_USERNAME;
 
 const registerController = async (req,res) => {
+    // validation first
+    expected_body = {
+        username: "string",
+        email: "string",
+        password: "string"
+    };
+    if(!validator(req.body, expected_body)){
+        return res.status(400).json({message:"error in body format"});
+    }
     try {
         const {email,password,username} = req.body;
         if (!username || !password || !email){
