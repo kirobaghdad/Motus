@@ -7,6 +7,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -14,11 +15,23 @@ find_package(rclpy REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(map_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 add_executable(pointcloud_to_gridoccupancy src/pointcloud_to_gridoccupancy.cpp)
 
 add_executable(path_planner src/path_planner.cpp)
+add_executable(path_handler src/path_handler.cpp)
 add_executable(map_loader src/map_loader.cpp)
+
+ament_target_dependencies(path_handler
+  rclcpp
+  nav_msgs
+  geometry_msgs
+  nav2_msgs
+  rclcpp_action
+)
 
 ament_target_dependencies(path_planner
   rclcpp
@@ -39,6 +52,9 @@ ament_target_dependencies(pointcloud_to_gridoccupancy
   nav_msgs
   sensor_msgs
   geometry_msgs
+  tf2_geometry_msgs
+  tf2_sensor_msgs
+  tf2_ros
 )
 
 install(TARGETS
