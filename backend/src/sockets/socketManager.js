@@ -17,7 +17,7 @@ module.exports = (io) => {
 
         socket.on("finished-trips", async (data) => {
             const tripHandler = require("./tripHandler");
-            await tripHandler(data, socket);
+            await tripHandler(data, socket, io);
         });
 
         socket.on('disconnect', () => {

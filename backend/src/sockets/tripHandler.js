@@ -3,7 +3,7 @@ const { updateCarState } = require("../globals/carState");
 const validator = require("../services/validation");
 const car_username = process.env.CAR_USERNAME;
 
-module.exports = async (data, socket) => {
+module.exports = async (data, socket, io) => {
 
     // validation first
     expected_body = {
