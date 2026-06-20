@@ -31,6 +31,9 @@ ament_target_dependencies(path_handler
   geometry_msgs
   nav2_msgs
   rclcpp_action
+  tf2_geometry_msgs
+  tf2_sensor_msgs
+  tf2_ros
 )
 
 ament_target_dependencies(path_planner
@@ -90,8 +93,12 @@ install(PROGRAMS
   src/test_car.py
   DESTINATION lib/${PROJECT_NAME}
 )
-
-# 8. Install Launch, Maps, and Params folders
+# 8. Install Python scripts
+install(PROGRAMS
+  src/backend_communication.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+# 9. Install Launch, Maps, and Params folders
 install(DIRECTORY
   launch
   maps

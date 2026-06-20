@@ -9,6 +9,10 @@
 #include "std_msgs/msg/int32.hpp"
 #include <queue>
 #include <string>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 
 using namespace std::chrono_literals;
 
@@ -30,6 +34,9 @@ public:
     };
         
     PathHandler() : Node("path_handler") {
+        // declare parameters for node 
+        this->declare_parameter<int>("max_window_size", 16);
+        this->declare_parameter<int>("max_wait_minutes", 3);
         // Create a subscriber to the map topic
         map_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
             "map", 10, std::bind(&PathHandler::map_callback, this, std::placeholders::_1));
@@ -48,6 +55,9 @@ public:
         user_start_sub_ = this->create_subscription<std_msgs::msg::Int32>("user_start", 10, std::bind(&PathHandler::user_start_callback, this, std::placeholders::_1));
         // Create a Publisher to tell backend if trip finished or canceled in both cases it is ended
         trip_status_pub_ = this->create_publisher<std_msgs::msg::Bool>("trip_status", 10);
+
+        tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+        tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     }
 
 private:
@@ -77,9 +87,11 @@ private:
     }
     //void wait_feedback_state(){}
     void wait_user_state(){
+        int max_wait_time = 3;
+        this->get_parameter("max_wait_time", max_wait_time);
         // max wait time is 3 minutes
-        if (waiting_time > 1800) {
-            RCLCPP_INFO(this->get_logger(), "User not in the car for 3 minutes, ending trip!");
+        if (waiting_time > max_wait_time * 600) {
+            RCLCPP_INFO(this->get_logger(), "User not in the car for %d minutes, ending trip!", max_wait_time);
             trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
             state_machine = State::IDLE;
             reset_variables();
@@ -180,9 +192,12 @@ private:
         }
         return pose; // return pose itself and trip will be cancelled
     }
-    bool isFrontier(size_t index) {
+    bool isFrontier(int index) {
         int x = index % map.info.width;
         int y = index / map.info.width;
+        if (index >= int(map.data.size()) || index < 0) {
+            return false;
+        }
         if (map.data[index] != 0) {
             return false;
         }
@@ -198,27 +213,63 @@ private:
         }
         return false;
     }
-    geometry_msgs::msg::Pose explore(geometry_msgs::msg::Pose pose){
+    geometry_msgs::msg::Pose explore(geometry_msgs::msg::Pose goal){
         // return nearest frontier to the goal
         int nearest_frontier_index = -1;
-        int goalIndex = get_index(pose);
-        if (goalIndex == -1) return pose;
+        int goalIndex = get_index(goal);
+        if (goalIndex == -1) return goal;
         int goal_x = goalIndex % static_cast<int>(map.info.width);
         int goal_y = goalIndex / static_cast<int>(map.info.width);
-        int min_dist = INT_MAX;
-        for (size_t i = 0; i < map.data.size(); i++) {
-            if (isFrontier(i)) {
-                int frontier_x = i % static_cast<int>(map.info.width);
-                int frontier_y = i / static_cast<int>(map.info.width);
-                int dist = abs(frontier_x - goal_x) + abs(frontier_y - goal_y);// manhatten distance
-                if (dist < min_dist) {
-                    min_dist = dist;
-                    nearest_frontier_index = i;
+        // get car pose
+        geometry_msgs::msg::TransformStamped car_transform;
+        
+        try {
+            // Look up the transform from the car to the map
+            car_transform = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
+            
+        } catch (const tf2::TransformException &ex) {
+            RCLCPP_WARN(this->get_logger(), "Could not transform car to map: %s", ex.what());
+            return goal;
+        }
+        
+        // Calculate map coordinates of car position
+        double car_x = car_transform.transform.translation.x;
+        double car_y = car_transform.transform.translation.y;
+        
+        int car_col = (car_x - map.info.origin.position.x) / map.info.resolution;
+        int car_row = (car_y - map.info.origin.position.y) / map.info.resolution;
+
+        if (car_col < 0 || car_col > (int)map.info.width || car_row < 0 || car_row > (int)map.info.height) {
+            RCLCPP_WARN(this->get_logger(), "Car position is outside the grid");
+            return goal;
+        }
+
+        double max_window_size = 16;
+        int window_size = static_cast<int>(std::ceil(max_window_size/map.info.resolution));
+        this->get_parameter("max_window_size", max_window_size);
+        // get window to search on
+        int min_x = std::max(car_col - window_size, 0);
+        int max_x = std::min(car_col + window_size, (int)map.info.width);
+        int min_y = std::max(car_row - window_size, 0);
+        int max_y = std::min(car_row + window_size, (int)map.info.height);
+        double min_dist = double(INT_MAX);
+        for (int i = min_x; i < max_x; i++) {
+            for (int j = min_y; j < max_y; j++) {
+                if (isFrontier(i * map.info.width + j)) {
+                    double dx = i - goal_x;
+                    double dy = j - goal_y;
+                    double dist_to_goal = std::sqrt(dx * dx + dy * dy);// euclidian distance
+                    double dist_to_car = std::abs(i - car_col) + std::abs(j - car_row);// manhatten distance
+                    double dist = dist_to_goal + dist_to_car;
+                    if (dist < min_dist) {
+                        min_dist = dist;
+                        nearest_frontier_index = i * map.info.width + j;
+                    }
                 }
             }
         }
         if (nearest_frontier_index == -1) {
-            return pose;
+            return goal;
         }
         geometry_msgs::msg::Pose frontier_pose;
         frontier_pose.position.x = (nearest_frontier_index % map.info.width - 0.5) * map.info.resolution + map.info.origin.position.x;
@@ -424,6 +475,8 @@ private:
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr user_state_sub_;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr user_start_sub_;
     std::queue<geometry_msgs::msg::PoseStamped> path_queue;
+    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     nav_msgs::msg::OccupancyGrid map;
     geometry_msgs::msg::PoseStamped current_sub_goal;
     State state_machine = State::IDLE;
