@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const tokenSchema = require("../models/token");
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
-const authenticateJWT = (req,res,next) => {
+const authenticateJWT = async (req,res,next) => {
    const authHeader = req.headers.authorization;
 
    if (!authHeader){
@@ -14,6 +15,13 @@ const authenticateJWT = (req,res,next) => {
 
    if (!JWT_SECRET) {
     return res.status(500).json({message: 'JWT secret not configured'});
+   }
+
+   // check if token exists in database
+   const tokenExists = await tokenSchema.findOne({ token: token });
+
+   if (!tokenExists) {
+      return res.status(401).json({ message: 'Session expired. Please log in again.' });
    }
 
    try {
