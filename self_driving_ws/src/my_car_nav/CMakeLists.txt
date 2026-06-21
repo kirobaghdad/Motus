@@ -65,6 +65,11 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(TARGETS
+  path_handler
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(PROGRAMS
   src/path_planner2.py
   DESTINATION lib/${PROJECT_NAME}
@@ -98,7 +103,12 @@ install(PROGRAMS
   src/backend_communication.py
   DESTINATION lib/${PROJECT_NAME}
 )
-# 9. Install Launch, Maps, and Params folders
+# 9. Install Python scripts
+install(PROGRAMS
+  src/create_map.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+# 10. Install Launch, Maps, and Params folders
 install(DIRECTORY
   launch
   maps

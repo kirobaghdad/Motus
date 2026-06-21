@@ -7,6 +7,7 @@ from std_msgs.msg import Bool
 import socketio
 import threading
 import tf2_ros
+from rclpy.duration import Duration
 
 # Initialize the Socket.io Client
 sio = socketio.Client()
@@ -24,9 +25,11 @@ class BackendCommunicationNode(Node):
         self.backend_poses_pub = self.create_publisher(PoseArray, 'backend_poses', 10)
         self.user_start_pub = self.create_publisher(Int32, 'user_start', 10)  
         self.trip_status_sub = self.create_subscription(Bool, 'trip_status', self.trip_status_callback, 10)
+        self.user_state_pub = self.create_publisher(Bool, 'user_state', 10)
 
         self.timer = self.create_timer(1.0, self.send_car_pose_to_backend_callback)  
         self.trip_id = None
+        self.username = None
         
         # Define Socket.io event handlers inside the node context
         @sio.event
@@ -53,14 +56,24 @@ class BackendCommunicationNode(Node):
             start_index = 0
             for index, pose in enumerate(data["poses"]):
                 pose_msg = Pose()
-                if pose['x'] == data["startLocation"]['x'] and pose['y'] == data["startLocation"]['y']:
+                if pose['x'] == data["start"]['x'] and pose['y'] == data["start"]['y']:
                     start_index = index
                 pose_msg.position.x = float(pose['x'])
                 pose_msg.position.y = float(pose['y'])
                 poses.poses.append(pose_msg)
             self.backend_poses_pub.publish(poses)
-            self.user_start_pub.publish(Int32(data=start_index))
-            self.trip_id = data["trip_id"]
+            self.user_start_pub.publish(Int32(data=start_index-1))
+            if "tripId" in data:
+                self.trip_id = data["tripId"]
+            else:
+                self.trip_id = None
+            self.username = data["username"]
+        
+        @sio.on('cancelled-trip')
+        def on_received_cancelled_trip(data):
+            self.get_logger().info(f"Received cancelled trip from backend: {data}")
+            self.trip_id = None
+            self.user_state_pub.publish(Bool(data=False))
 
         # Start the socketio connection in a background thread so it doesn't block ROS 2
         self.sio_thread = threading.Thread(target=self.start_socket)
@@ -70,7 +83,14 @@ class BackendCommunicationNode(Node):
     def send_car_pose_to_backend_callback(self):
 
         try:
-            car_transform = self.tf_buffer.lookup_transform('map', 'base_link', rclpy.time.Time())
+            timeout_duration = Duration(seconds=0, nanoseconds=20000000)
+        
+            car_transform = self.tf_buffer.lookup_transform(
+                'map', 
+                'base_link', 
+                rclpy.time.Time(), 
+                timeout=timeout_duration
+            )
             car_pose = {
                 "x": car_transform.transform.translation.x,
                 "y": car_transform.transform.translation.y
@@ -90,8 +110,11 @@ class BackendCommunicationNode(Node):
 
     def trip_status_callback(self, msg):
         if sio.connected:
-            if msg.data:
-                sio.emit('finished-trips', {'tripId': self.trip_id})
+            if self.trip_id is not None:
+                sio.emit('finished-trips', {'tripId': self.trip_id, 'immediate': False, 'completed': msg.data})
+                self.trip_id = None
+            else:
+                sio.emit('finished-trips', {'tripId': "123455", 'immediate': True, 'completed': msg.data})
 
 
 def main(args=None):

@@ -234,8 +234,8 @@ function findFinalNearestNode(pose) {
         return null;
     }
     let NearestNodeEdge2 = null;
-    if ("place" in carNearestNodeEdge) {
-        position = carNearestNodeEdge.place.entrance_position;
+    if ("place" in NearestNodeEdge) {
+        position = NearestNodeEdge.place.entrance_position;
         NearestNodeEdge2 = hdmap.getNearestNode(position);
     }
     let finalId = 0;

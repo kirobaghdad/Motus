@@ -83,18 +83,30 @@ private:
         if (user_start_index == -1 || path_queue.empty()) {
             return;
         }
+        path_current_index = 0;
+        resend_flag = false;
+        goal_status = GoalStatus::UNKNOWN;
+        waiting_time = 0;
+        user_state = false;
         state_machine = State::SEND_GOAL;
     }
     //void wait_feedback_state(){}
     void wait_user_state(){
         int max_wait_time = 3;
-        this->get_parameter("max_wait_time", max_wait_time);
+        this->get_parameter("max_wait_minutes", max_wait_time);
+        if (user_state) {
+            RCLCPP_INFO(this->get_logger(), "User confirmed presence! Advancing to next waypoint.");
+            user_state = false; // Reset toggle
+            state_machine = State::SEND_GOAL;
+            return;
+        }
         // max wait time is 3 minutes
         if (waiting_time > max_wait_time * 600) {
             RCLCPP_INFO(this->get_logger(), "User not in the car for %d minutes, ending trip!", max_wait_time);
-            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
+            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(false));
             state_machine = State::IDLE;
             reset_variables();
+            return;
         }
         waiting_time++;
     }
@@ -224,11 +236,13 @@ private:
         geometry_msgs::msg::TransformStamped car_transform;
         
         try {
-            // Look up the transform from the car to the map
-            car_transform = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
-            
+            // Look up the transform from the car to the map with a 20ms wait timeout
+            car_transform = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero, tf2::durationFromSec(0.02));
+    
         } catch (const tf2::TransformException &ex) {
-            RCLCPP_WARN(this->get_logger(), "Could not transform car to map: %s", ex.what());
+            // Throttling the warning ensures your terminal isn't flooded if a frame drops under heavy CPU load
+            RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000, 
+                         "Syncing car frames... Transform lag: %s", ex.what());
             return goal;
         }
         
@@ -239,7 +253,7 @@ private:
         int car_col = (car_x - map.info.origin.position.x) / map.info.resolution;
         int car_row = (car_y - map.info.origin.position.y) / map.info.resolution;
 
-        if (car_col < 0 || car_col > (int)map.info.width || car_row < 0 || car_row > (int)map.info.height) {
+        if (car_col < 0 || car_col >= (int)map.info.width || car_row < 0 || car_row >= (int)map.info.height) {
             RCLCPP_WARN(this->get_logger(), "Car position is outside the grid");
             return goal;
         }
@@ -255,7 +269,7 @@ private:
         double min_dist = double(INT_MAX);
         for (int i = min_x; i < max_x; i++) {
             for (int j = min_y; j < max_y; j++) {
-                if (isFrontier(i * map.info.width + j)) {
+                if (isFrontier(j * map.info.width + i)) {
                     double dx = i - goal_x;
                     double dy = j - goal_y;
                     double dist_to_goal = std::sqrt(dx * dx + dy * dy);// euclidian distance
@@ -272,8 +286,8 @@ private:
             return goal;
         }
         geometry_msgs::msg::Pose frontier_pose;
-        frontier_pose.position.x = (nearest_frontier_index % map.info.width - 0.5) * map.info.resolution + map.info.origin.position.x;
-        frontier_pose.position.y = (nearest_frontier_index / map.info.width - 0.5) * map.info.resolution + map.info.origin.position.y;
+        frontier_pose.position.x = (nearest_frontier_index % map.info.width + 0.5) * map.info.resolution + map.info.origin.position.x;
+        frontier_pose.position.y = (nearest_frontier_index / map.info.width + 0.5) * map.info.resolution + map.info.origin.position.y;
         return frontier_pose;   
     }
     void send_goal_state() {
@@ -289,18 +303,18 @@ private:
             reset_variables();
             return;
         }
-
-        if (path_current_index == user_start_index) {
-            state_machine = State::WAIT_USER;
-            return;
-        }
             
         
         switch (goal_status) {
             case GoalStatus::SUCCEEDED:
+                if (path_current_index == user_start_index + 1) {
+                    state_machine = State::WAIT_USER;
+                    waiting_time = 0;
+                    goal_status = GoalStatus::UNKNOWN;
+                    return;
+                }
                 current_sub_goal = path_queue.front();
                 resend_flag = false;
-                path_current_index++;
                 if (isUnkownCell(current_sub_goal.pose)) {
                     geometry_msgs::msg::Pose pose = explore(current_sub_goal.pose);
                     current_sub_goal.pose = pose;
@@ -310,18 +324,9 @@ private:
                 }
                 break;
             case GoalStatus::ABORTED:
-                // try resending goal if do it before 1 time end trip
-                if (resend_flag) {
-                    trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
-                    reset_variables();
-                    return;
-                }
-                resend_flag = true;
-                current_sub_goal = path_queue.front();
-                break;
             case GoalStatus::CANCELED:
                 if (resend_flag) {
-                    trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
+                    trip_status_pub_->publish(std_msgs::msg::Bool().set__data(false));
                     reset_variables();
                     return;
                 }
@@ -342,7 +347,7 @@ private:
 
         // check if goal is valid
         if (get_index(current_sub_goal.pose) == -1) {
-            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
+            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(false));
             reset_variables();
             return;
         }
@@ -383,7 +388,7 @@ private:
     void goal_response_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr& goal_handle) {
         if (!goal_handle) {
             RCLCPP_ERROR(this->get_logger(), "Goal was rejected by Nav2 Action Server!");
-            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(true));
+            trip_status_pub_->publish(std_msgs::msg::Bool().set__data(false));
             state_machine = State::IDLE;
             reset_variables();
             return;
@@ -406,6 +411,7 @@ private:
                 RCLCPP_INFO(this->get_logger(), "Goal successfully reached!");
                 goal_status = GoalStatus::SUCCEEDED;
                 path_queue.pop();
+                path_current_index++;
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_ERROR(this->get_logger(), "Goal execution was aborted by Nav2!");
@@ -435,6 +441,8 @@ private:
                 path_queue.push(sub_goal);
             }
         }
+        // remove firts car pose
+        path_queue.pop();
     }
 
     void map_callback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
@@ -442,9 +450,11 @@ private:
     }
 
     void user_state_callback(const std_msgs::msg::Bool::SharedPtr msg) {
-        bool user_state = msg->data;
-        if (user_state) {
-            state_machine = State::SEND_GOAL;
+
+        if (msg->data) {
+            if (state_machine == State::WAIT_USER) {
+                user_state = true;
+            }
         } else {
             RCLCPP_INFO(this->get_logger(), "User cancelled the trip!");
             reset_variables();
@@ -465,6 +475,7 @@ private:
         state_machine = State::IDLE;
         user_start_index = -1;
         waiting_time = 0;
+        user_state = false;
     }
 
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
@@ -485,6 +496,7 @@ private:
     int path_current_index = 0;
     int user_start_index = -1;
     int waiting_time = 0;
+    bool user_state = false;
 };
 
 int main(int argc, char **argv) {

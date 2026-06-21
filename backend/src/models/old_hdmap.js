@@ -25,7 +25,7 @@ class HDMap {
     // { incoming: [...edges], outgoing: [...edges]}
     this.nodeEdges = {};
     for (const n of this.nodes) {
-      this.nodeEdges[n.id] = { incoming: [], outgoing: []};
+      this.nodeEdges[n.id] = { incoming: [], outgoing: [] };
     }
 
     for (const e of this.edges) {
@@ -74,7 +74,7 @@ class HDMap {
   getBlockSizeInPixel() {
     return this.blockSizeInPixel;
   }
-  
+
   getFoot() {
     return this.foot;
   }
@@ -92,24 +92,27 @@ class HDMap {
   }
 
   // get place id
-  getPlaceId(name){
+  getPlaceId(name) {
     if (!name) return null;
     const nodeId = this.places.get(name);
     if (!nodeId) return null;
     return nodeId;
   }
 
-  getNearestNode(pose){
-    if (pose === null || pose === undefined){
+  getNearestNode(pose) {
+    if (pose === null || pose === undefined) {
       return null;
     }
     // first check if pose is inside any region, if so return entrance node
     const region = this.findRegion(pose);
     if (region) {
-      return {nodeId:region.entrance_node_id, edge: null};
+      if (region.banned) {
+        return null;
+      }
+      return { nodeId: region.entrance_node_id, edge: null };
     }
     const sortedNodes = PriorityQueue();
-    for(const node of this.nodes){
+    for (const node of this.nodes) {
       const dx = node.x - pose.x;
       const dy = node.y - pose.y;
       const d = (dx * dx + dy * dy);
@@ -120,7 +123,7 @@ class HDMap {
       const nodeId = node.key;
       const nodeObj = this.getNodeById(nodeId);
       if (Math.sqrt(node.priority) <= nodeObj.r) {
-        return {nodeId: nodeId, edge: -1};
+        return { nodeId: nodeId, edge: -1 };
       }
       for (const edge of this.getIncomingEdges(nodeId)) {
         const neighborId = this.getNeighbour(nodeId, edge);
@@ -129,7 +132,7 @@ class HDMap {
         const dy = (nodeObj.y - neighborObj.y) * (nodeObj.y - pose.y);
         const dotProduct = dx + dy;
         if (dotProduct > 0) {
-          return {nodeId: nodeId, edge: edge};
+          return { nodeId: nodeId, edge: edge };
         }
       }
     }
@@ -141,17 +144,17 @@ class HDMap {
   }
 
   findRegion(pose) {
-    if (pose === null || pose === undefined){
+    if (pose === null || pose === undefined) {
       return null;
     }
     for (const region of this.regions) {
-      for (let i = 0; i < region.area.length; i+=4) {
+      for (let i = 0; i < region.area.length; i += 4) {
         const x = region.area[i];
-        const y = region.area[i+1];
-        const w = region.area[i+2];
-        const h = region.area[i+3];
+        const y = region.area[i + 1];
+        const w = region.area[i + 2];
+        const h = region.area[i + 3];
         if (this.pointInRectangle(pose, x, y, w, h)) {
-          return { entrance_node_id: region.entrance_node_id , banned: region.banned};
+          return { entrance_node_id: region.entrance_node_id, banned: region.banned };
         }
       }
     }

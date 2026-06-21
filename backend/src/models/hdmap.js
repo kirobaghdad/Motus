@@ -31,7 +31,7 @@ class HDMap {
     // { incoming: [...edges], outgoing: [...edges]}
     this.nodeEdges = {};
     for (const n of this.nodes) {
-      this.nodeEdges[n.id] = { incoming: [], outgoing: []};
+      this.nodeEdges[n.id] = { incoming: [], outgoing: [] };
     }
 
     for (const e of this.edges) {
@@ -96,7 +96,7 @@ class HDMap {
   getBlockSizeInPixel() {
     return this.blockSizeInPixel;
   }
-  
+
   getFoot() {
     return this.foot;
   }
@@ -113,17 +113,20 @@ class HDMap {
     }
   }
 
-  getNearestNode(pose){
-    if (pose === null || pose === undefined){
+  getNearestNode(pose) {
+    if (pose === null || pose === undefined) {
       return null;
     }
-    // first check if pose is inside any place, if so return entrance pose
-    const place = this.findRegion(pose);
+    // first check if pose is inside any place, if so return place
+    const place = this.findPlace(pose);
     if (place) {
-      return {place:place};
+      if (place.banned) {
+        return null;
+      }
+      return { place: place };
     }
     const sortedNodes = PriorityQueue();
-    for(const node of this.nodes){
+    for (const node of this.nodes) {
       const dx = node.x - pose.x;
       const dy = node.y - pose.y;
       const d = (dx * dx + dy * dy);
@@ -140,16 +143,16 @@ class HDMap {
         const dy = (nodeObj.y - neighborObj.y) * (nodeObj.y - pose.y);
         const dotProduct = dx + dy;
         if (dotProduct > 0) {
-          return {nodeId: nodeId, edge: edge};
+          return { nodeId: nodeId, edge: edge };
         }
       }
     }
     return null;
   }
 
-  isInSameRoad(node1,node2) {
-    for(const r1Id in node1.roadIds) {
-      for(const r2Id in node2.roadIds) {
+  isInSameRoad(node1, node2) {
+    for (const r1Id in node1.roadIds) {
+      for (const r2Id in node2.roadIds) {
         if (r1Id === r2Id) {
           return true;
         }
@@ -158,18 +161,18 @@ class HDMap {
     return false;
   }
 
-  rayLine(point,point1,point2) {
-    if (point1.y > point2.y){
-        let tmp = point2;
-        point2 = point1;
-        point1 = tmp;
+  rayLine(point, point1, point2) {
+    if (point1.y > point2.y) {
+      let tmp = point2;
+      point2 = point1;
+      point1 = tmp;
     }
 
     if (point.y <= point1.y || point.y > point2.y)
-        return false;
+      return false;
 
     if (point1.x === point2.x)
-        return (point.x < point1.x);
+      return (point.x < point1.x);
 
     const fraction = (point.y - point1.y) / (point2.y - point1.y);
     const intersect_x = point1.x + fraction * (point2.x - point1.x);
@@ -177,26 +180,26 @@ class HDMap {
 
   }
 
-  rayCasting(point,polygon) {
+  rayCasting(point, polygon) {
     let collision = 0;
-    for (let i = 0; i < polygon.length; i++){
-        if (i === (polygon.length - 1)){
-            collision += rayLine(point,polygon[i],polygon[0]);
-        } else {
-            collision += rayLine(point,polygon[i],polygon[i+1]);
-        }
+    for (let i = 0; i < polygon.length; i++) {
+      if (i === (polygon.length - 1)) {
+        collision += rayLine(point, polygon[i], polygon[0]);
+      } else {
+        collision += rayLine(point, polygon[i], polygon[i + 1]);
+      }
     }
     return (collision % 2 === 1);
   }
 
   findPlace(pose) {
-    if (pose === null || pose === undefined){
+    if (pose === null || pose === undefined) {
       return null;
     }
     for (const place of this.places) {
-        const polygon = place.polygon
-        if (this.rayCasting(pose,polygon))
-            return place;
+      const polygon = place.polygon
+      if (this.rayCasting(pose, polygon))
+        return place;
     }
     return null;
   }
