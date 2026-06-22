@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "run": "node src/app.js",
-    "test": "vitest run test/",
+    "test": "vitest run tests/",
     "test:car": "node src/test/testCar.js",
     "test:mobile": "node src/test/testMobile.js",
     "dev": "nodemon src/app.js"

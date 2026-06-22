@@ -37,6 +37,8 @@ public:
         // declare parameters for node 
         this->declare_parameter<int>("max_window_size", 16);
         this->declare_parameter<int>("max_wait_minutes", 3);
+        this->declare_parameter<float>("max_distance_from_obstacle", 1);
+        this->declare_parameter<float>("car_width", 0.3);
         // Create a subscriber to the map topic
         map_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
             "map", 10, std::bind(&PathHandler::map_callback, this, std::placeholders::_1));
@@ -143,16 +145,39 @@ private:
         if (index == -1) return false;
         return map.data[index] == 0;
     }
+    bool is_no_obstacle_around(int x,int y,int d){
+        size_t width = map.info.width;
+        int min_x = std::max(x-d,0);
+        int max_x = std::min(x+d,static_cast<int>(width - 1));
+        int min_y = std::max(y-d,0);
+        int max_y = std::min(y+d,static_cast<int>(map.info.height - 1));
+
+        for (int i = min_x; i <= max_x; i++){
+            for (int j = min_y; j <= max_y; j++){
+                if (map.data[ j * width + i ] == 100){
+                    return false;
+                }
+            }
+        }
+        return true;
+
+    }
     geometry_msgs::msg::Pose get_nearest_free_cell(geometry_msgs::msg::Pose pose){
         int index = get_index(pose);
         if (index == -1) return pose; // return pose itself and trip will be cancelled
-        int ring = 1;
         size_t width = map.info.width;
         size_t height = map.info.height;
         float resolution = map.info.resolution;
         int x_index = index % static_cast<int>(width);
         int y_index = index / static_cast<int>(width);
-        while (ring < 21)  {
+        float car_width = 0.3;
+        this->get_parameter("car_width", car_width);
+        int distance_in_cells = std::ceil(car_width / map.info.resolution);
+        int ring = distance_in_cells + 1;
+        float max_distance_from_obstacle = 1;
+        this->get_parameter("max_distance_from_obstacle", max_distance_from_obstacle);
+        int max_distance_in_cells = std::ceil(max_distance_from_obstacle / map.info.resolution);
+        while (ring <= max_distance_in_cells)  {
             // get cells in ring around cell
             int x_start = x_index - ring;
             int x_end = x_index + ring;
@@ -162,7 +187,7 @@ private:
             for (int i = y_start; i <= y_end; i++) {
                 int j = x_start;
                 if (i >= 0 && i < static_cast<int>(height) && j >= 0 && j < static_cast<int>(width)) {
-                    if (map.data[i * width + j] == 0) {
+                    if (map.data[i * width + j] == 0 && is_no_obstacle_around(j,i,distance_in_cells)) {
                         geometry_msgs::msg::Pose pose;
                         pose.position.x = (j - 0.5) * resolution + map.info.origin.position.x;
                         pose.position.y = (i - 0.5) * resolution + map.info.origin.position.y;
@@ -171,7 +196,7 @@ private:
                 }
                 j = x_end;
                 if (i >= 0 && i < static_cast<int>(height) && j >= 0 && j < static_cast<int>(width)) {
-                    if (map.data[i * width + j] == 0) {
+                    if (map.data[i * width + j] == 0 && is_no_obstacle_around(j,i,distance_in_cells)) {
                         geometry_msgs::msg::Pose pose;
                         pose.position.x = (j - 0.5) * resolution + map.info.origin.position.x;
                         pose.position.y = (i - 0.5) * resolution + map.info.origin.position.y;
@@ -183,7 +208,7 @@ private:
             for (int j = x_start + 1; j < x_end; j++) {
                 int i = y_start;
                 if (i >= 0 && i < static_cast<int>(height) && j >= 0 && j < static_cast<int>(width)) {
-                    if (map.data[i * width + j] == 0) {
+                    if (map.data[i * width + j] == 0 && is_no_obstacle_around(j,i,distance_in_cells)) {
                         geometry_msgs::msg::Pose pose;
                         pose.position.x = (j - 0.5) * resolution + map.info.origin.position.x;
                         pose.position.y = (i - 0.5) * resolution + map.info.origin.position.y;
@@ -192,7 +217,7 @@ private:
                 }
                 i = y_end;
                 if (i >= 0 && i < static_cast<int>(height) && j >= 0 && j < static_cast<int>(width)) {
-                    if (map.data[i * width + j] == 0) {
+                    if (map.data[i * width + j] == 0 && is_no_obstacle_around(j,i,distance_in_cells)) {
                         geometry_msgs::msg::Pose pose;
                         pose.position.x = (j - 0.5) * resolution + map.info.origin.position.x;
                         pose.position.y = (i - 0.5) * resolution + map.info.origin.position.y;
@@ -263,9 +288,9 @@ private:
         this->get_parameter("max_window_size", max_window_size);
         // get window to search on
         int min_x = std::max(car_col - window_size, 0);
-        int max_x = std::min(car_col + window_size, (int)map.info.width);
+        int max_x = std::min(car_col + window_size, (int)map.info.width - 1);
         int min_y = std::max(car_row - window_size, 0);
-        int max_y = std::min(car_row + window_size, (int)map.info.height);
+        int max_y = std::min(car_row + window_size, (int)map.info.height - 1);
         double min_dist = double(INT_MAX);
         for (int i = min_x; i < max_x; i++) {
             for (int j = min_y; j < max_y; j++) {
@@ -338,6 +363,7 @@ private:
                 if (isUnkownCell(current_sub_goal.pose)) {
                     geometry_msgs::msg::Pose pose = explore(current_sub_goal.pose);
                     current_sub_goal.pose = pose;
+                    was_explore = true;
                 } else if (isObstacle(current_sub_goal.pose)) {
                     geometry_msgs::msg::Pose pose = get_nearest_free_cell(current_sub_goal.pose);
                     current_sub_goal.pose = pose;
@@ -410,8 +436,12 @@ private:
             case rclcpp_action::ResultCode::SUCCEEDED:
                 RCLCPP_INFO(this->get_logger(), "Goal successfully reached!");
                 goal_status = GoalStatus::SUCCEEDED;
-                path_queue.pop();
-                path_current_index++;
+                if (was_explore) {
+                    was_explore = false;
+                } else {
+                    path_queue.pop();
+                    path_current_index++;
+                }
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_ERROR(this->get_logger(), "Goal execution was aborted by Nav2!");
@@ -497,6 +527,7 @@ private:
     int user_start_index = -1;
     int waiting_time = 0;
     bool user_state = false;
+    bool was_explore = false;
 };
 
 int main(int argc, char **argv) {

@@ -1,6 +1,6 @@
 const PriorityQueue = require('../utils/priorityQueue');
 
-const {getCarPose} = require('../globals/carState');
+const { getCarPose } = require('../globals/carState');
 const hdmap = require('../globals/mapState');
 
 // Euclidean distance heuristic for A*
@@ -44,9 +44,9 @@ function aStarSearch(startId, goalId) {
       }
       return pathArr.reverse();
     }
-    const edges = hdmap.getNodeEdges(currentId);
+    const edges = hdmap.getOutgoingEdges(currentId);
     for (const e of edges) {
-      const neighbourId = hdmap.getNeighbour(currentId,e);
+      const neighbourId = hdmap.getNeighbour(currentId, e);
       if (exploredset.has(neighbourId)) continue;
       const travelcost = e.length + gScore.get(currentId);
       // if g cost of neighbour is greater than current one refuse it
@@ -82,7 +82,7 @@ function optimizePathStart(path, nearestNodeEdge) {
 }
 
 function optimizePathEnd(path, nearestNodeEdge) {
-    if (!nearestNodeEdge || !path || path.length < 2) return;
+  if (!nearestNodeEdge || !path || path.length < 2) return;
   const nearestEdge = nearestNodeEdge.edge;
   const nearestNode = nearestNodeEdge.nodeId;
   if (nearestEdge) {
@@ -103,9 +103,9 @@ function optimizePathEnd(path, nearestNodeEdge) {
 
 function solveSameEdgeCase(path, startNearestNodeEdge, destNearestNodeEdge) {
   if (!startNearestNodeEdge || !destNearestNodeEdge || !path || path.length < 2) return;
-  if ( startNearestNodeEdge.edge.to === destNearestNodeEdge.edge.to && startNearestNodeEdge.edge.from === destNearestNodeEdge.edge.from) {
+  if (startNearestNodeEdge.edge.to === destNearestNodeEdge.edge.to && startNearestNodeEdge.edge.from === destNearestNodeEdge.edge.from) {
     // same edge but must make sure going directly to destination is in the same direction of edge
-    if (edge.bi_directional){
+    if (edge.bi_directional) {
       path = []; // make car go directly to destination if start and destination are in the same edge and edge is bi directional
       return;
     }
@@ -130,7 +130,7 @@ function tripPlanning(start, destination) {
   const carposeInMeter = getCarpose()
   const carpose = convertPoseFromMetersToBlock(carposeInMeter);
   const nearestNodeEdge = hdmap.getNearestNode(carpose);
-  if (nearestNodeEdge === null){
+  if (nearestNodeEdge === null) {
     return null;
   }
   //get places ids
@@ -140,7 +140,7 @@ function tripPlanning(start, destination) {
   // use a star search
   const path1 = aStarSearch(nearestNodeEdge.nodeId, startId);
   const path2 = aStarSearch(startId, goalId);
-  if (path1 === null || path2 === null){
+  if (path1 === null || path2 === null) {
     return null;
   }
   // optimize path1 by removing case when car go to nearest node and then astar say that other node in same edge is next node.
@@ -171,7 +171,7 @@ function getPath(start, destination) {
   const carposeInMeter = getCarpose()
   const carpose = convertPoseFromMetersToBlock(carposeInMeter);
   const carNearestNodeEdge = hdmap.getNearestNode(carpose);
-  if (carNearestNodeEdge === null){
+  if (carNearestNodeEdge === null) {
     return null;
   }
   // check if start and destination are in regions or near to node
@@ -239,10 +239,10 @@ function convertPoseFromMetersToPixels(pose) {
   return { x: (pose.x / blockSizeInMeter) * blockSizeInPixel, y: (pose.y / blockSizeInMeter) * blockSizeInPixel };
 }
 
-function convertPoseFromMetersToBlock(pose){
+function convertPoseFromMetersToBlock(pose) {
   if (!pose) return null;
   const blockSizeInMeter = hdmap.getBlockSizeInFoot() * hdmap.getFoot();
-  return { x: (pose.x / blockSizeInMeter), y: (pose.y / blockSizeInMeter)};
+  return { x: (pose.x / blockSizeInMeter), y: (pose.y / blockSizeInMeter) };
 }
 
-module.exports = { tripPlanning, getPath, convertPosesTometers, convertPosesToPixels, convertPoseFromMetersToPixels};
+module.exports = { tripPlanning, getPath, convertPosesTometers, convertPosesToPixels, convertPoseFromMetersToPixels };

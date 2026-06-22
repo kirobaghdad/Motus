@@ -4,7 +4,7 @@ const hdmap = require("../globals/mapState");
 const validator = require("../services/validation");
 const parsePose = require("../utils/parser");
 const { updateCarState, getCarState } = require("../globals/carState");
-const { getPath, convertPosesTometers, convertPosesToPixels } = require("../services/pathPlanning");
+const { getPath, convertPosesToMeters, convertPosesToPixels } = require("../services/pathPlanning");
 
 const tripController = {
     bookTrip: async (req, res) => {
@@ -24,8 +24,8 @@ const tripController = {
             if (!destination || !startLocation || !tripDateTime) {
                 return res.status(400).json({ message: "Missing destination or start location or date" });
             }
-            startPlace = hdmap.getPlaceByName(startLocation);
-            destPlace = hdmap.getPlaceByName(destination);
+            const startPlace = hdmap.getPlaceByName(startLocation);
+            const destPlace = hdmap.getPlaceByName(destination);
             if (!startPlace || !destPlace) {
                 return res.status(400).json({ message: "places not exist" });
             }
@@ -125,7 +125,7 @@ const tripController = {
             return res.status(400).json({ message: "error in body format" });
         }
         // get path
-        const { startLocation, destination } = req.body;
+        let { startLocation, destination } = req.body;
         startLocation = parsePose(startLocation);
         destination = parsePose(destination);
         poses = getPath(startLocation, destination);
@@ -137,7 +137,7 @@ const tripController = {
         const payload1 = {
             start: startLocation,
             username: req.user.username,
-            poses: convertPosesTometers(poses)
+            poses: convertPosesToMeters(poses)
         };
         // Build payload to send to mobile app
         const payload2 = {

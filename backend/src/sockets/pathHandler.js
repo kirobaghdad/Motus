@@ -1,6 +1,6 @@
 const tripSchema = require("../models/trip");
 const { updateCarState, getCarState } = require("../globals/carState");
-const { tripPlanning, convertPosesToPixels, convertPosesTometers } = require("../services/pathPlanning");
+const { tripPlanning, convertPosesToPixels, convertPosesToMeters } = require("../services/pathPlanning");
 const cron = require('node-cron');
 const hdmap = require("../globals/mapState");
 
@@ -40,14 +40,14 @@ module.exports = async (io) => {
             }
 
             startPosition = hdmap.getPlaceByName(trip.startLocation).entrance_position;
-            convertedStartPosition = convertPosesTometers([startPosition])[0];
+            convertedStartPosition = convertPosesToMeters([startPosition])[0];
 
             // Build payload to send to car
             const payload1 = {
                 tripId: trip._id,
                 start: convertedStartPosition,
                 username: trip.username,
-                poses: convertPosesTometers(poses)
+                poses: convertPosesToMeters(poses)
             };
             // Build payload to send to mobile app
             const payload2 = {

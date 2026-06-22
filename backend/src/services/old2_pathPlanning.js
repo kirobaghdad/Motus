@@ -14,7 +14,7 @@ function heuristic(nodeA, nodeB) {
 // A* search on the HDMap between node ids
 // Returns array of nodeIds from start -> goal or null if no path
 function aStarSearch(startId, goalId) {
-    if (startId === null || startId === undefined || goalId === null || goalId === undefined) return null;
+    if (!startId || !goalId) return null;
     if (startId === goalId) return [startId];
     const startNode = hdmap.getNodeById(startId);
     const goalNode = hdmap.getNodeById(goalId);
@@ -62,87 +62,77 @@ function aStarSearch(startId, goalId) {
 }
 
 function optimizePathStart(path, nearestNodeEdge) {
-    if (!nearestNodeEdge || !path) return;
+    if (!nearestNodeEdge || !path || path.length < 2) return;
     const nearestEdge = nearestNodeEdge.edge;
     const nearestNode = nearestNodeEdge.nodeId;
-    if (nearestEdge && path.length > 1) {
-        const from = nearestEdge.from;
-        const to = nearestEdge.to;
-        if (path[0] === from || path[1] === to) {
-            // nearest node could be skiped and car go directly to next node remove first element of path
-            path.shift();
-            return;
-        }
-        if (path[0] === to || path[1] === from) {
+    for (edge of hdmap.getIncomingEdges(nodeId)) {
+        if (edge.roadId !== nearestEdge.roadId) continue;
+        const neighbourNodeID = hdmap.getNeighbour(nearestNode, edge);
+        if (neighbourNodeID && path[1] === neighbourNodeID) {
             // nearest node could be skiped and car go directly to next node remove first element of path
             path.shift();
             return;
         }
     }
-    if (nearestNode !== null && nearestNode !== undefined) {
-        if (path.length === 2) {
+    for (edge of hdmap.getOutgoingEdges(nodeId)) {
+        if (edge.roadId !== nearestEdge.roadId) continue;
+        const neighbourNodeID = hdmap.getNeighbour(nearestNode, edge);
+        if (neighbourNodeID && path[1] === neighbourNodeID) {
+            // nearest node could be skiped and car go directly to next node remove first element of path
             path.shift();
+            return;
         }
     }
 }
 
 function optimizePathEnd(path, nearestNodeEdge) {
-    if (!nearestNodeEdge || !path) return;
+    if (!nearestNodeEdge || !path || path.length < 2) return;
     const nearestEdge = nearestNodeEdge.edge;
     const nearestNode = nearestNodeEdge.nodeId;
-    if (nearestEdge && path.length > 1) {
-        const from = nearestEdge.from;
-        const to = nearestEdge.to;
-        if (path[path.length - 2] === from || path[path.length - 1] === to) {
-            // nearest node could be skiped and car go directly to next node remove first element of path
-            path.pop();
-            return;
-        }
-        if (path[path.length - 2] === to || path[path.length - 1] === from) {
+    for (edge of hdmap.getIncomingEdges(nodeId)) {
+        if (edge.roadId !== nearestEdge.roadId) continue;
+        const neighbourNodeID = hdmap.getNeighbour(nearestNode, edge);
+        if (neighbourNodeID && path[path.length - 2] === neighbourNodeID) {
             // nearest node could be skiped and car go directly to next node remove first element of path
             path.pop();
             return;
         }
     }
-    if (nearestNode !== null && nearestNode !== undefined) {
-        path.pop();
-    }
-}
-
-function solveEdgeNodeCase(startNearestNodeEdge, destNearestNodeEdge) {
-    if (!startNearestNodeEdge || !destNearestNodeEdge) return null;
-    if (startNearestNodeEdge.edge && destNearestNodeEdge.nodeId !== null && destNearestNodeEdge.nodeId !== undefined) {
-        const edge = startNearestNodeEdge.edge;
-        const nodeId = destNearestNodeEdge.nodeId;
-        if ((edge.from === nodeId && edge.bi_directional) || edge.to === nodeId) {
-            return [];
+    for (edge of hdmap.getOutgoingEdges(nodeId)) {
+        if (edge.roadId !== nearestEdge.roadId) continue;
+        const neighbourNodeID = hdmap.getNeighbour(nearestNode, edge);
+        if (neighbourNodeID && path[path.length - 2] === neighbourNodeID) {
+            // nearest node could be skiped and car go directly to next node remove first element of path
+            path.pop();
+            return;
         }
     }
-    if (destNearestNodeEdge.edge && startNearestNodeEdge.nodeId !== null && startNearestNodeEdge.nodeId !== undefined) {
-        const edge = destNearestNodeEdge.edge;
-        const nodeId = startNearestNodeEdge.nodeId;
-        if (edge.from === nodeId || (edge.to === nodeId && edge.bi_directional)) {
-            return [];
-        }
-    }
-    return null;
 }
 
 function solveSameRoadCase(startNearestNodeEdge, destNearestNodeEdge) {
     if (!startNearestNodeEdge || !destNearestNodeEdge) return null;
-    if (!startNearestNodeEdge.edge || !destNearestNodeEdge.edge) return null;
     if (startNearestNodeEdge.edge.roadId === destNearestNodeEdge.edge.roadId) {
         // same road but must make sure going directly to destination is in the same direction of road
-        let pose1 = startNearestNodeEdge.pose;
-        let pose2 = destNearestNodeEdge.pose;
-        if (startNearestNodeEdge.place) {
-            pose1 = startNearestNodeEdge.place.entrance_position;
-        }
-        if (destNearestNodeEdge.place) {
-            pose2 = destNearestNodeEdge.place.entrance_position;
-        }
-        if (hdmap.IsValidDirection(startNearestNodeEdge.edge, pose1, pose2)) {
+        if (edge.bi_directional) {
+            // make car go directly to destination if start and destination are in the same road and road is bi directional
             return [];
+        }
+        const roadDirection = findDirectionOfRoad(startNearestNodeEdge.edge);
+        const startDestDirection = findStartDestDirection(startNearestNodeEdge, destNearestNodeEdge);
+        const dotProduct = roadDirection.dx * startDestDirection.dx + roadDirection.dy * startDestDirection.dy;
+        if (dotProduct > 0) {
+            // make car go directly to destination if start and destination are in the same direction
+            return [];
+        }
+        // different direction car can not go back in wrong direction
+        if (startNearestNodeEdge.nodeId === destNearestNodeEdge.nodeId) {
+            const neighbourNodeId = hdmap.getNeighbour(destNearestNodeEdge.nodeId, destNearestNodeEdge.edge);
+            const path = aStarSearch(startNearestNodeEdge.nodeId, neighbourNodeId);
+            return path;
+        }
+        if (startNearestNodeEdge.nodeId !== destNearestNodeEdge.nodeId) {
+            const path = aStarSearch(startNearestNodeEdge.nodeId, destNearestNodeEdge.nodeId);
+            return path;
         }
     }
     return null;
@@ -150,7 +140,7 @@ function solveSameRoadCase(startNearestNodeEdge, destNearestNodeEdge) {
 
 function solveSamePlaceCase(startNearestNodeEdge, destNearestNodeEdge) {
     if (!startNearestNodeEdge || !destNearestNodeEdge) return null;
-    if (!startNearestNodeEdge.place || !destNearestNodeEdge.place) return null;
+    if (!startNearestNodeEdge.place.name || !destNearestNodeEdge.place.name) return null;
     if (startNearestNodeEdge.place.name === destNearestNodeEdge.place.name) {
         return [startNearestNodeEdge.pose, destNearestNodeEdge.pose];
     }
@@ -159,9 +149,20 @@ function solveSamePlaceCase(startNearestNodeEdge, destNearestNodeEdge) {
 
 function solveSameNodeCase(startNearestNodeEdge, destNearestNodeEdge) {
     if (!startNearestNodeEdge || !destNearestNodeEdge) return null;
-    if (startNearestNodeEdge.nodeId === null || startNearestNodeEdge.nodeId === undefined || destNearestNodeEdge.nodeId === null || destNearestNodeEdge.nodeId === undefined) return null;
     if (startNearestNodeEdge.nodeId === destNearestNodeEdge.nodeId) {
-        return [];
+        if (startNearestNodeEdge.edge.roadId !== destNearestNodeEdge.edge.roadId) {
+            // of course both are entring the node so only four cases
+            if (!destNearestNodeEdge.edge.bi_directional) {
+                // start -> node <- destination && start -- node <- destination
+                const neighbourNodeId = hdmap.getNeighbour(destNearestNodeEdge.nodeId, destNearestNodeEdge.edge);
+                const path = aStarSearch(startNearestNodeEdge.nodeId, neighbourNodeId);
+                return path;
+            }
+            if (destNearestNodeEdge.edge.bi_directional) {
+                // start -> node -- destination && start -- node -- destination
+                return [startNearestNodeEdge.nodeId];
+            }
+        }
     }
     return null;
 }
@@ -174,51 +175,32 @@ function optimizerPipeline(startNearestNodeEdge, destNearestNodeEdge) {
     }
     path = solveSameNodeCase(startNearestNodeEdge, destNearestNodeEdge);
     if (path) {
-        poses = completePath(startNearestNodeEdge, destNearestNodeEdge, path);
+        path = optimizePathStart(path, startNearestNodeEdge);
+        //path = optimizePathEnd(path,destNearestNodeEdge);
+        poses = convertPathtoPoses(path);
+        poses = completePath(startNearestNodeEdge, destNearestNodeEdge, poses);
         return poses;
     }
     path = solveSameRoadCase(startNearestNodeEdge, destNearestNodeEdge);
     if (path) {
-        poses = completePath(startNearestNodeEdge, destNearestNodeEdge, path);
+        path = optimizePathStart(path, startNearestNodeEdge);
+        path = optimizePathEnd(path, destNearestNodeEdge);
+        poses = convertPathtoPoses(path);
+        poses = completePath(startNearestNodeEdge, destNearestNodeEdge, poses);
         return poses;
     }
-    path = solveEdgeNodeCase(startNearestNodeEdge, destNearestNodeEdge);
-    if (path) {
-        poses = completePath(startNearestNodeEdge, destNearestNodeEdge, path);
-        return poses;
+    let destId = null;
+    if (destNearestNodeEdge.edge.bi_directional) {
+        destId = destNearestNodeEdge.nodeId;
+    } else {
+        destId = hdmap.getNeighbour(destNearestNodeEdge.nodeId, destNearestNodeEdge.edge);
     }
-    const destId = getAstarNode(destNearestNodeEdge, false);
-    const startId = getAstarNode(startNearestNodeEdge, true);
-    console.log("startId:", startId);
-    console.log("destId:", destId);
-    path = aStarSearch(startId, destId);
-    console.log("Path after aStarSearch:", JSON.stringify(path));
-    optimizePathStart(path, startNearestNodeEdge);
-    console.log("Path after start optimization:", JSON.stringify(path));
-    optimizePathEnd(path, destNearestNodeEdge);
-    console.log("Path after end optimization:", JSON.stringify(path));
-    if (!path)
-        return null;
+    path = aStarSearch(startNearestNodeEdge.nodeId, destId);
+    path = optimizePathStart(path, startNearestNodeEdge);
+    path = optimizePathEnd(path, destNearestNodeEdge);
     poses = convertPathtoPoses(path);
     poses = completePath(startNearestNodeEdge, destNearestNodeEdge, poses);
     return poses;
-}
-
-function getAstarNode(nearestNodeEdge, isStart) {
-    if (!nearestNodeEdge)
-        return null;
-    if (nearestNodeEdge.nodeId !== null && nearestNodeEdge.nodeId !== undefined)
-        return nearestNodeEdge.nodeId;
-    if (nearestNodeEdge.edge.bi_directional) {
-        let pose = nearestNodeEdge.pose;
-        if (nearestNodeEdge.place)
-            pose = nearestNodeEdge.place.entrance_position;
-        return hdmap.getNearestNodeInEdge(nearestNodeEdge.edge, pose)
-    }
-    if (isStart)
-        return nearestNodeEdge.edge.to;
-    else
-        return nearestNodeEdge.edge.from;
 }
 
 function completePath(startNearestNodeEdge, destNearestNodeEdge, path) {
@@ -244,35 +226,29 @@ function tripPlanning(start, destination) {
     const starPosition = hdmap.getPlacePosition(start);
     const goalPosition = hdmap.getPlacePosition(destination);
     if (starPosition === null || goalPosition === null) return null;
-    return getPath(starPosition, goalPosition)
+    return this.getPath(starPosition, goalPosition)
 }
 
 function findFinalNearestNode(pose) {
-    const nearestNodeEdge = hdmap.findRegionInMap(pose);
-    if (nearestNodeEdge === null) {
+    const NearestNodeEdge = hdmap.getNearestNode(pose);
+    if (NearestNodeEdge === null) {
         return null;
     }
-    let nearestNodeEdge2 = null;
-    if ("place" in nearestNodeEdge) {
-        const position = nearestNodeEdge.place.entrance_position;
-        nearestNodeEdge2 = hdmap.findRegionInMap(position);
+    let NearestNodeEdge2 = null;
+    if ("place" in NearestNodeEdge) {
+        position = NearestNodeEdge.place.entrance_position;
+        NearestNodeEdge2 = hdmap.getNearestNode(position);
     }
-    let finalId = null;
+    let finalId = 0;
     let finalEdge = null;
     let finalPlace = null;
-    if (nearestNodeEdge2) {
-        finalPlace = nearestNodeEdge.place;
-        if ("edge" in nearestNodeEdge2) {
-            finalEdge = nearestNodeEdge2.edge;
-        } else {
-            finalId = nearestNodeEdge2.nodeId;
-        }
+    if (NearestNodeEdge2) {
+        finalId = NearestNodeEdge2.nodeId;
+        finalEdge = NearestNodeEdge2.edge;
+        finalPlace = NearestNodeEdge.place;
     } else {
-        if ("edge" in nearestNodeEdge) {
-            finalEdge = nearestNodeEdge.edge;
-        } else {
-            finalId = nearestNodeEdge.nodeId;
-        }
+        finalId = NearestNodeEdge.nodeId;
+        finalEdge = NearestNodeEdge.edge;
     }
     return {
         nodeId: finalId,
@@ -287,7 +263,7 @@ function getPath(start, destination) {
     if (!start || !destination) return null;
     if (start.x === destination.x && start.y === destination.y) return null;
     // get car pose and find nearest node
-    const carposeInMeter = getCarPose();
+    const carposeInMeter = getCarPose()
     const carpose = convertPoseFromMetersToBlock(carposeInMeter);
     const carNearestNodeEdge = findFinalNearestNode(carpose);
     if (carNearestNodeEdge === null) {
@@ -316,7 +292,33 @@ function convertPathtoPoses(path) {
     return poses;
 }
 
-function convertPosesToMeters(poses) {
+function findDirectionOfRoad(edge) {
+    const fromNode = hdmap.getNodeById(edge.from);
+    const toNode = hdmap.getNodeById(edge.to);
+    const dx = toNode.x - fromNode.x;
+    const dy = toNode.y - fromNode.y;
+    return { dx: dx, dy: dy }
+}
+
+function findStartDestDirection(startNearestNodeEdge, destNearestNodeEdge) {
+    let p1 = null;
+    let p2 = null;
+    if (startNearestNodeEdge.place) {
+        p1 = startNearestNodeEdge.place.entrance_position;
+    } else {
+        p1 = startNearestNodeEdge.pose;
+    }
+    if (destNearestNodeEdge.place) {
+        p2 = destNearestNodeEdge.place.entrance_position;
+    } else {
+        p2 = destNearestNodeEdge.pose;
+    }
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p2.y;
+    return { dx: dx, dy: dy };
+}
+
+function convertPosesTometers(poses) {
     if (!poses || poses.length === 0) return null;
     const convertedPoses = [];
     const blockSizeInMeter = hdmap.getBlockSizeInFoot() * hdmap.getFoot();
@@ -349,4 +351,4 @@ function convertPoseFromMetersToBlock(pose) {
     return { x: (pose.x / blockSizeInMeter), y: (pose.y / blockSizeInMeter) };
 }
 
-module.exports = { tripPlanning, getPath, convertPosesToMeters, convertPosesToPixels, convertPoseFromMetersToPixels };
+module.exports = { tripPlanning, getPath, convertPosesTometers, convertPosesToPixels, convertPoseFromMetersToPixels };
