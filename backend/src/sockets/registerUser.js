@@ -16,7 +16,7 @@ module.exports = async (data, socket, io) => {
         return;
     }
     try {
-        if (data.username === car_username && data.password === CAR_PASSWORD) {
+        if (data.username === car_username && data.password === car_password) {
             socket.join("only-car");
             io.users.set(data.username, socket.id);
             return;

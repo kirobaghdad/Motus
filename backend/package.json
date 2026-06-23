@@ -5,6 +5,9 @@
   "scripts": {
     "run": "node src/app.js",
     "test": "vitest run tests/",
+    "test-endpoints": "vitest run tests/endpoints.test.js",
+    "test-sockets": "vitest run tests/handler-sockets.test.js",
+    "test-services": "vitest run tests/pathPlanningOptimization.test.js",
     "test:car": "node src/test/testCar.js",
     "test:mobile": "node src/test/testMobile.js",
     "dev": "nodemon src/app.js"
