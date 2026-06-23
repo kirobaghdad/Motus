@@ -35,7 +35,7 @@ const profileController = {
             const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
             updatedToken = await tokenSchema.findOneAndUpdate(
                 { username: req.user.username },
-                { $set: { token: token } }
+                { $set: { token: token, username: username } }
             );
             if (!updatedToken) {
                 return res.status(404).json({ message: "User not found" });

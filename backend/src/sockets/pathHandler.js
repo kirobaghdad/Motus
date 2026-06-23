@@ -23,10 +23,12 @@ module.exports = async (io) => {
         for (let trip of dueTrips) {
             if (trip.tripDateTime.getTime() < new Date(now - 5 * 60 * 1000)) {
                 // trip time has passed the tolerance time for delay
-                cancelTrip(trip, io);
+                if (io) {
+                    await cancelTrip(trip, io);
+                }
                 continue;
             }
-            if (!getCarState()) {
+            if (!getCarState().vacant) {
                 continue;
             }
             console.log(`Trip ${trip._id} is starting now!`);
@@ -35,12 +37,14 @@ module.exports = async (io) => {
             const poses = tripPlanning(trip.startLocation, trip.destination);
 
             if (poses === null || poses === undefined) {
-                cancelTrip(trip, io);
+                if (io) {
+                    await cancelTrip(trip, io);
+                }
                 continue;
             }
 
-            startPosition = hdmap.getPlaceByName(trip.startLocation).entrance_position;
-            convertedStartPosition = convertPosesToMeters([startPosition])[0];
+            const startPosition = hdmap.getPlaceByName(trip.startLocation).entrance_position;
+            const convertedStartPosition = convertPosesToMeters([startPosition])[0];
 
             // Build payload to send to car
             const payload1 = {
@@ -63,7 +67,9 @@ module.exports = async (io) => {
                 console.log('send sub-goals to car and mobile app');
             } else {
                 console.warn('Socket.io not available on app; cannot send sub-goals');
-                cancelTrip(trip, io);
+                if (io) {
+                    await cancelTrip(trip, io);
+                }
                 continue;
             }
 

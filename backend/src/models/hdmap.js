@@ -72,7 +72,7 @@ class HDMap {
     }
 
     getPlacePosition(name) {
-        place = this.placeMap.get(name);
+        const place = this.placeMap.get(name);
         if (place) {
             return place.entrance_position
         }
@@ -97,6 +97,14 @@ class HDMap {
 
     getFoot() {
         return this.foot;
+    }
+
+    getPlaces() {
+        const placesNames = [];
+        for (const place of this.places) {
+            placesNames.push(place.name);
+        }
+        return placesNames;
     }
 
     // Utility: get neighbor node id for a node

@@ -244,7 +244,9 @@ function tripPlanning(start, destination) {
     const starPosition = hdmap.getPlacePosition(start);
     const goalPosition = hdmap.getPlacePosition(destination);
     if (starPosition === null || goalPosition === null) return null;
-    return getPath(starPosition, goalPosition)
+
+    const path = getPath(starPosition, goalPosition)
+    return path;
 }
 
 function findFinalNearestNode(pose) {
