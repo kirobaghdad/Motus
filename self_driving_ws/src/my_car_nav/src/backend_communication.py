@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseArray
@@ -69,9 +70,9 @@ class BackendCommunicationNode(Node):
                 self.trip_id = None
             self.username = data["username"]
         
-        @sio.on('cancelled-trip')
-        def on_received_cancelled_trip(data):
-            self.get_logger().info(f"Received cancelled trip from backend: {data}")
+        @sio.on('canceled-trip')
+        def on_received_canceled_trip(data):
+            self.get_logger().info(f"Received canceled trip from backend: {data}")
             self.trip_id = None
             self.user_state_pub.publish(Bool(data=False))
 

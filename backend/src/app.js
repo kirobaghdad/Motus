@@ -1,9 +1,11 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', 'env') });
 const express = require('express');
 const connectDB = require('./config/db');
 connectDB(); // Connect to the database
 const http = require('http');
-const {Server} = require('socket.io');
+const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -11,9 +13,11 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: '*', // tighten in production
-    methods: ['GET','POST']
+    methods: ['GET', 'POST']
   }
 });
+
+app.use(cors());
 
 app.use(express.json()); // allow app to read json data
 app.use(bodyParser.json());

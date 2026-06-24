@@ -83,7 +83,7 @@ const tripController = {
             }
             if (trip.state === "live") {
                 io = req.app.get('io');
-                io.to("only-car").emit("cancelled-trip", { message: "Trip cancelled by user" });
+                io.to("only-car").emit("canceled-trip", { message: "Trip canceled by user" });
             }
             trip.state = "deleted";
             await trip.save();

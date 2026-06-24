@@ -40,14 +40,14 @@ controller_server:
       plugin: "nav2_controller::SimpleGoalChecker"
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      max_linear_vel: 0.5
-      min_linear_vel: -0.5
-      max_angular_vel: 2.5
-      min_angular_vel: -2.5
-      max_linear_accel: 2.5
-      max_linear_decel: -2.5
-      max_angular_accel: 3.2
-      max_angular_decel: -3.2
+      max_linear_vel: 1.2
+      min_linear_vel: -1.2
+      max_angular_vel: 1.0
+      min_angular_vel: -1.0
+      max_linear_accel: 1.0
+      max_linear_decel: -1.0
+      max_angular_accel: 1.0
+      max_angular_decel: -1.0
       lookahead_dist: 0.6
       min_lookahead_dist: 0.3
       max_lookahead_dist: 0.9
@@ -69,7 +69,7 @@ controller_server:
       use_rotate_to_heading: true
       allow_reversing: false
       rotate_to_heading_min_angle: 0.785
-      min_distance_to_obstacle: 0.0
+      min_distance_to_obstacle: 0.1
       use_dynamic_window: false
       allow_obstacle_checking_beyond_goal: false
       scaling_factor: 1.0

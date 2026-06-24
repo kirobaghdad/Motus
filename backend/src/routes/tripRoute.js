@@ -6,6 +6,6 @@ const authenticateJWT = require('../middleware/authentication');
 router.post('/book-trip', authenticateJWT, tripController.bookTrip);
 router.delete('/delete-trip', authenticateJWT, tripController.deleteTrip);
 router.get('/trips', authenticateJWT, tripController.getTrips);
-router.get('/immediate-trip', authenticateJWT, tripController.executeTrip);
+router.post('/immediate-trip', authenticateJWT, tripController.executeTrip);
 
 module.exports = router;

@@ -86,6 +86,13 @@ def generate_launch_description():
         output='screen'
     )
 
+    communication_node = Node(
+        package='my_car_nav',
+        executable='backend_communication.py',
+        name='backend_communication',
+        output='screen'
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'params_file', 
@@ -93,9 +100,9 @@ def generate_launch_description():
             description='Full path to the ROS2 parameters file to use'
         ),
         sim_node,
-        map_server_node,          # Added
-        lifecycle_manager_node,   # Added
-        cloud_to_grid_node,       # Fixed variable reference here
+        map_server_node,          
+        lifecycle_manager_node,   
+        cloud_to_grid_node,       
         nav2_bringup_launch,
         rviz_node,
         path_handler_node

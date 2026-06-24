@@ -119,19 +119,19 @@ private:
         for (const auto& index : occupied_cells){
             int col = index % grid.info.width;
             int row = index / grid.info.width;
-            trace_line(car_col, car_row, col, row);
+            trace_line(car_col, car_row, col, row, occupied_cells);
         }
         map_pub_->publish(grid);
     }
     // Midpoint Bresenham's Line Drawing algorithm but for tracing line from car to point cloud
-    void trace_line(int x1, int y1, int x2, int y2){
+    void trace_line(int x1, int y1, int x2, int y2, std::unordered_set<int>& occupied_cells){
         if (abs(x2 - x1) > abs(y2 - y1)){
-            trace_line_along_x(x1, y1, x2, y2);
+            trace_line_along_x(x1, y1, x2, y2, occupied_cells);
         } else {
-            trace_line_along_y(x1, y1, x2, y2);
+            trace_line_along_y(x1, y1, x2, y2, occupied_cells);
         }
     }
-    void trace_line_along_y(int x1, int y1, int x2, int y2){
+    void trace_line_along_y(int x1, int y1, int x2, int y2, std::unordered_set<int>& occupied_cells){
         // solve problem of swapping direction
         bool swapped = false;
         std::vector<int> indices;
@@ -160,9 +160,9 @@ private:
                 f += -2 * dx;
             }
         }
-        handle_cells(indices, swapped);
+        handle_cells(indices, swapped, occupied_cells);
     }
-    void trace_line_along_x(int x1, int y1, int x2, int y2){
+    void trace_line_along_x(int x1, int y1, int x2, int y2, std::unordered_set<int>& occupied_cells){
         // solve problem of swaping direction
         bool swapped = false;
         std::vector<int> indices;
@@ -191,9 +191,9 @@ private:
                 f += -2 * dy;
             }
         }  
-        handle_cells(indices, swapped);  
+        handle_cells(indices, swapped, occupied_cells);  
     }
-    void handle_cells(std::vector<int>& indices, bool swapped){
+    void handle_cells(std::vector<int>& indices, bool swapped, std::unordered_set<int>& occupied_cells){
         size_t start = 0;
         size_t end = indices.size() - 1;
         if (swapped){
@@ -203,15 +203,11 @@ private:
         size_t i = start;
         while (i != end){
             int index = indices[i];
-            /*
             if (grid.data[index] == 100 && occupied_cells.count(index) > 0 ){
                 // this is not dynamic object, it is static object
                 break;
             }
-            */
-            if (grid.data[index] == -1){
-                grid.data[index] = 0;
-            }
+            grid.data[index] = 0;
             if (swapped){
                 i--;
             } else {

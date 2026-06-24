@@ -21,8 +21,7 @@ const loginController = {
         if (!username || !password) {
             return res.status(400).json({ message: 'Username and password are required' });
         }
-        // retrieve all users
-        user = await userSchema.findOne({ username: username });
+        const user = await userSchema.findOne({ username: username });
         if (!user) {
             return res.status(401).json({ message: 'wrong username' })
         }
