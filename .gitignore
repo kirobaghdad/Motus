@@ -1,0 +1,35 @@
+﻿__pycache__/
+*.py[cod]
+*$py.class
+
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+.DS_Store
+Thumbs.db
+
+# fine-tuning generated files
+fine_tuning/workspace/*
+!fine_tuning/workspace/reports/
+!fine_tuning/workspace/reports/**
+
+# controller generated files
+carla_controllers/workspace/*
+!carla_controllers/workspace/runs/
+carla_controllers/workspace/runs/*
+!carla_controllers/workspace/runs/.gitkeep
+!carla_controllers/workspace/runs/pid_speed_20260625_031508/
+!carla_controllers/workspace/runs/pid_speed_20260625_031508/config_used.json
+!carla_controllers/workspace/runs/pid_speed_20260625_031508/summary.json
+!carla_controllers/workspace/runs/pid_speed_20260625_031508/telemetry.csv
+!carla_controllers/workspace/reports/
+!carla_controllers/workspace/videos/
+carla_controllers/workspace/videos/*
+!carla_controllers/workspace/videos/.gitkeep
+
+*.zip
+*.rar
+*.crdownload
+*.tmp
+~$*

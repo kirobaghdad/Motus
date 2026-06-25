@@ -1,0 +1,485 @@
+{
+  "source_type": "roboflow_merged",
+  "roboflow_format": "yolov8",
+  "raw_dir": "/content/fine_tuning/workspace/raw/roboflow",
+  "custom_dataset_yaml": "/content/fine_tuning/workspace/datasets/roboflow_carla_traffic_f6/custom12/data.yaml",
+  "baseline_coco_dataset_yaml": "/content/fine_tuning/workspace/datasets/roboflow_carla_traffic_f6/baseline_coco80/data.yaml",
+  "custom_names": {
+    "0": "bike",
+    "1": "vehicle",
+    "2": "person",
+    "3": "motobike",
+    "4": "traffic_light_green",
+    "5": "traffic_light_orange",
+    "6": "traffic_light_red",
+    "7": "traffic_sign_30",
+    "8": "traffic_sign_60",
+    "9": "traffic_sign_90",
+    "10": "traffic_light_unknown",
+    "11": "traffic_sign_unknown"
+  },
+  "baseline_coco_mapping": {
+    "0": {
+      "custom_name": "bike",
+      "coco_id": 1,
+      "coco_name": "bicycle",
+      "note": "direct semantic match."
+    },
+    "1": {
+      "custom_name": "vehicle",
+      "coco_id": 2,
+      "coco_name": "car",
+      "note": "vehicle labels may include cars and trucks; COCO car is an approximation."
+    },
+    "2": {
+      "custom_name": "person",
+      "coco_id": 0,
+      "coco_name": "person",
+      "note": "direct semantic match."
+    },
+    "3": {
+      "custom_name": "motobike",
+      "coco_id": 3,
+      "coco_name": "motorcycle",
+      "note": "direct semantic match."
+    },
+    "4": {
+      "custom_name": "traffic_light_green",
+      "coco_id": 9,
+      "coco_name": "traffic light",
+      "note": "COCO has traffic lights but not light colors."
+    },
+    "5": {
+      "custom_name": "traffic_light_orange",
+      "coco_id": 9,
+      "coco_name": "traffic light",
+      "note": "COCO has traffic lights but not light colors."
+    },
+    "6": {
+      "custom_name": "traffic_light_red",
+      "coco_id": 9,
+      "coco_name": "traffic light",
+      "note": "COCO has traffic lights but not light colors."
+    },
+    "7": {
+      "custom_name": "traffic_sign_30",
+      "coco_id": 11,
+      "coco_name": "stop sign",
+      "note": "speed signs are approximated as COCO stop sign."
+    },
+    "8": {
+      "custom_name": "traffic_sign_60",
+      "coco_id": 11,
+      "coco_name": "stop sign",
+      "note": "speed signs are approximated as COCO stop sign."
+    },
+    "9": {
+      "custom_name": "traffic_sign_90",
+      "coco_id": 11,
+      "coco_name": "stop sign",
+      "note": "speed signs are approximated as COCO stop sign."
+    },
+    "10": {
+      "custom_name": "traffic_light_unknown",
+      "coco_id": 9,
+      "coco_name": "traffic light",
+      "note": "f6 generic traffic lights are mapped to an unknown light state."
+    },
+    "11": {
+      "custom_name": "traffic_sign_unknown",
+      "coco_id": 11,
+      "coco_name": "stop sign",
+      "note": "f6 generic traffic signs are mapped to an unknown sign type."
+    }
+  },
+  "source_datasets": {
+    "carla_traffic": {
+      "workspace": "gp-rspur",
+      "project": "carla-traffic-dataset-uao1b",
+      "version": 1,
+      "raw_dir": "/content/fine_tuning/workspace/raw/roboflow/carla_traffic",
+      "source_names": {
+        "0": "bike",
+        "1": "motobike",
+        "2": "person",
+        "3": "traffic_light_green",
+        "4": "traffic_light_orange",
+        "5": "traffic_light_red",
+        "6": "traffic_sign_30",
+        "7": "traffic_sign_60",
+        "8": "traffic_sign_90",
+        "9": "vehicle"
+      },
+      "class_map": {
+        "bike": "bike",
+        "vehicle": "vehicle",
+        "person": "person",
+        "motobike": "motobike",
+        "traffic_light_green": "traffic_light_green",
+        "traffic_light_orange": "traffic_light_orange",
+        "traffic_light_red": "traffic_light_red",
+        "traffic_sign_30": "traffic_sign_30",
+        "traffic_sign_60": "traffic_sign_60",
+        "traffic_sign_90": "traffic_sign_90"
+      },
+      "splits": {
+        "train": {
+          "target_split": "train",
+          "images": 4800,
+          "empty_label_files": 240,
+          "objects_by_class_name": {
+            "bike": 450,
+            "motobike": 396,
+            "person": 1101,
+            "traffic_light_green": 906,
+            "traffic_light_orange": 399,
+            "traffic_light_red": 858,
+            "traffic_sign_30": 762,
+            "traffic_sign_60": 450,
+            "traffic_sign_90": 189,
+            "vehicle": 3120
+          },
+          "source_objects_by_class_name": {
+            "bike": 450,
+            "motobike": 396,
+            "person": 1101,
+            "traffic_light_green": 906,
+            "traffic_light_orange": 399,
+            "traffic_light_red": 858,
+            "traffic_sign_30": 762,
+            "traffic_sign_60": 450,
+            "traffic_sign_90": 189,
+            "vehicle": 3120
+          }
+        },
+        "valid": {
+          "target_split": "val",
+          "images": 264,
+          "empty_label_files": 69,
+          "objects_by_class_name": {
+            "bike": 21,
+            "motobike": 28,
+            "person": 25,
+            "traffic_light_green": 36,
+            "traffic_light_orange": 15,
+            "traffic_light_red": 58,
+            "traffic_sign_30": 22,
+            "traffic_sign_60": 14,
+            "traffic_sign_90": 6,
+            "vehicle": 138
+          },
+          "source_objects_by_class_name": {
+            "bike": 21,
+            "motobike": 28,
+            "person": 25,
+            "traffic_light_green": 36,
+            "traffic_light_orange": 15,
+            "traffic_light_red": 58,
+            "traffic_sign_30": 22,
+            "traffic_sign_60": 14,
+            "traffic_sign_90": 6,
+            "vehicle": 138
+          }
+        }
+      }
+    },
+    "carla_f6": {
+      "workspace": "yolo-new-head",
+      "project": "carla-f6",
+      "version": 1,
+      "raw_dir": "/content/fine_tuning/workspace/raw/roboflow/carla_f6",
+      "source_names": {
+        "0": "motorcycle",
+        "1": "pedestrian",
+        "2": "traffic light",
+        "3": "traffic sign",
+        "4": "vehicle"
+      },
+      "class_map": {
+        "motorcycle": "motobike",
+        "traffic_light": "traffic_light_unknown",
+        "pedestrian": "person",
+        "vehicle": "vehicle",
+        "traffic_sign": "traffic_sign_unknown"
+      },
+      "splits": {
+        "train": {
+          "target_split": "train",
+          "images": 7940,
+          "empty_label_files": 2,
+          "objects_by_class_name": {
+            "motobike": 1878,
+            "person": 2466,
+            "traffic_light_unknown": 14672,
+            "traffic_sign_unknown": 2018,
+            "vehicle": 14086
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 1878,
+            "pedestrian": 2466,
+            "traffic light": 14672,
+            "traffic sign": 2018,
+            "vehicle": 14086
+          }
+        },
+        "valid": {
+          "target_split": "val",
+          "images": 542,
+          "empty_label_files": 0,
+          "objects_by_class_name": {
+            "motobike": 96,
+            "person": 182,
+            "traffic_light_unknown": 991,
+            "traffic_sign_unknown": 86,
+            "vehicle": 1162
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 96,
+            "pedestrian": 182,
+            "traffic light": 991,
+            "traffic sign": 86,
+            "vehicle": 1162
+          }
+        },
+        "test": {
+          "target_split": "test",
+          "images": 115,
+          "empty_label_files": 0,
+          "objects_by_class_name": {
+            "motobike": 14,
+            "person": 33,
+            "traffic_light_unknown": 211,
+            "traffic_sign_unknown": 21,
+            "vehicle": 301
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 14,
+            "pedestrian": 33,
+            "traffic light": 211,
+            "traffic sign": 21,
+            "vehicle": 301
+          }
+        }
+      }
+    }
+  },
+  "splits": {
+    "train": {
+      "images": 12740,
+      "empty_label_files": 242,
+      "objects_by_class_id": {
+        "0": 450,
+        "1": 17206,
+        "2": 3567,
+        "3": 2274,
+        "4": 906,
+        "5": 399,
+        "6": 858,
+        "7": 762,
+        "8": 450,
+        "9": 189,
+        "10": 14672,
+        "11": 2018
+      },
+      "objects_by_class_name": {
+        "bike": 450,
+        "motobike": 2274,
+        "person": 3567,
+        "traffic_light_green": 906,
+        "traffic_light_orange": 399,
+        "traffic_light_red": 858,
+        "traffic_light_unknown": 14672,
+        "traffic_sign_30": 762,
+        "traffic_sign_60": 450,
+        "traffic_sign_90": 189,
+        "traffic_sign_unknown": 2018,
+        "vehicle": 17206
+      },
+      "sources": {
+        "carla_traffic": {
+          "source_split": "train",
+          "images": 4800,
+          "empty_label_files": 240,
+          "objects_by_class_name": {
+            "bike": 450,
+            "motobike": 396,
+            "person": 1101,
+            "traffic_light_green": 906,
+            "traffic_light_orange": 399,
+            "traffic_light_red": 858,
+            "traffic_sign_30": 762,
+            "traffic_sign_60": 450,
+            "traffic_sign_90": 189,
+            "vehicle": 3120
+          },
+          "source_objects_by_class_name": {
+            "bike": 450,
+            "motobike": 396,
+            "person": 1101,
+            "traffic_light_green": 906,
+            "traffic_light_orange": 399,
+            "traffic_light_red": 858,
+            "traffic_sign_30": 762,
+            "traffic_sign_60": 450,
+            "traffic_sign_90": 189,
+            "vehicle": 3120
+          }
+        },
+        "carla_f6": {
+          "source_split": "train",
+          "images": 7940,
+          "empty_label_files": 2,
+          "objects_by_class_name": {
+            "motobike": 1878,
+            "person": 2466,
+            "traffic_light_unknown": 14672,
+            "traffic_sign_unknown": 2018,
+            "vehicle": 14086
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 1878,
+            "pedestrian": 2466,
+            "traffic light": 14672,
+            "traffic sign": 2018,
+            "vehicle": 14086
+          }
+        }
+      }
+    },
+    "val": {
+      "images": 806,
+      "empty_label_files": 69,
+      "objects_by_class_id": {
+        "0": 21,
+        "1": 1300,
+        "2": 207,
+        "3": 124,
+        "4": 36,
+        "5": 15,
+        "6": 58,
+        "7": 22,
+        "8": 14,
+        "9": 6,
+        "10": 991,
+        "11": 86
+      },
+      "objects_by_class_name": {
+        "bike": 21,
+        "motobike": 124,
+        "person": 207,
+        "traffic_light_green": 36,
+        "traffic_light_orange": 15,
+        "traffic_light_red": 58,
+        "traffic_light_unknown": 991,
+        "traffic_sign_30": 22,
+        "traffic_sign_60": 14,
+        "traffic_sign_90": 6,
+        "traffic_sign_unknown": 86,
+        "vehicle": 1300
+      },
+      "sources": {
+        "carla_traffic": {
+          "source_split": "valid",
+          "images": 264,
+          "empty_label_files": 69,
+          "objects_by_class_name": {
+            "bike": 21,
+            "motobike": 28,
+            "person": 25,
+            "traffic_light_green": 36,
+            "traffic_light_orange": 15,
+            "traffic_light_red": 58,
+            "traffic_sign_30": 22,
+            "traffic_sign_60": 14,
+            "traffic_sign_90": 6,
+            "vehicle": 138
+          },
+          "source_objects_by_class_name": {
+            "bike": 21,
+            "motobike": 28,
+            "person": 25,
+            "traffic_light_green": 36,
+            "traffic_light_orange": 15,
+            "traffic_light_red": 58,
+            "traffic_sign_30": 22,
+            "traffic_sign_60": 14,
+            "traffic_sign_90": 6,
+            "vehicle": 138
+          }
+        },
+        "carla_f6": {
+          "source_split": "valid",
+          "images": 542,
+          "empty_label_files": 0,
+          "objects_by_class_name": {
+            "motobike": 96,
+            "person": 182,
+            "traffic_light_unknown": 991,
+            "traffic_sign_unknown": 86,
+            "vehicle": 1162
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 96,
+            "pedestrian": 182,
+            "traffic light": 991,
+            "traffic sign": 86,
+            "vehicle": 1162
+          }
+        }
+      }
+    },
+    "test": {
+      "images": 115,
+      "empty_label_files": 0,
+      "objects_by_class_id": {
+        "1": 301,
+        "2": 33,
+        "3": 14,
+        "10": 211,
+        "11": 21
+      },
+      "objects_by_class_name": {
+        "motobike": 14,
+        "person": 33,
+        "traffic_light_unknown": 211,
+        "traffic_sign_unknown": 21,
+        "vehicle": 301
+      },
+      "sources": {
+        "carla_f6": {
+          "source_split": "test",
+          "images": 115,
+          "empty_label_files": 0,
+          "objects_by_class_name": {
+            "motobike": 14,
+            "person": 33,
+            "traffic_light_unknown": 211,
+            "traffic_sign_unknown": 21,
+            "vehicle": 301
+          },
+          "source_objects_by_class_name": {
+            "motorcycle": 14,
+            "pedestrian": 33,
+            "traffic light": 211,
+            "traffic sign": 21,
+            "vehicle": 301
+          }
+        }
+      }
+    }
+  },
+  "total_objects_by_class": {
+    "bike": 471,
+    "motobike": 2412,
+    "person": 3807,
+    "traffic_light_green": 942,
+    "traffic_light_orange": 414,
+    "traffic_light_red": 916,
+    "traffic_light_unknown": 15874,
+    "traffic_sign_30": 784,
+    "traffic_sign_60": 464,
+    "traffic_sign_90": 195,
+    "traffic_sign_unknown": 2125,
+    "vehicle": 18807
+  }
+}

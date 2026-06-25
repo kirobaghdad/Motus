@@ -1,0 +1,161 @@
+project_name: carla_yolo11s_roboflow_traffic_f6
+
+dataset:
+  source_type: roboflow_merged
+  roboflow_format: yolov8
+  raw_dir: workspace/raw/roboflow
+  prepared_root: workspace/datasets/roboflow_carla_traffic_f6
+  custom_dataset_dir: workspace/datasets/roboflow_carla_traffic_f6/custom12
+  baseline_dataset_dir: workspace/datasets/roboflow_carla_traffic_f6/baseline_coco80
+
+  # Keep this order stable. It becomes the model's class order.
+  custom_names:
+    0: bike
+    1: vehicle
+    2: person
+    3: motobike
+    4: traffic_light_green
+    5: traffic_light_orange
+    6: traffic_light_red
+    7: traffic_sign_30
+    8: traffic_sign_60
+    9: traffic_sign_90
+    10: traffic_light_unknown
+    11: traffic_sign_unknown
+
+  sources:
+    - name: carla_traffic
+      workspace: gp-rspur
+      project: carla-traffic-dataset-uao1b
+      version: 1
+      raw_subdir: carla_traffic
+      expected_names:
+        0: bike
+        1: motobike
+        2: person
+        3: traffic_light_green
+        4: traffic_light_orange
+        5: traffic_light_red
+        6: traffic_sign_30
+        7: traffic_sign_60
+        8: traffic_sign_90
+        9: vehicle
+      class_map:
+        bike: bike
+        vehicle: vehicle
+        person: person
+        motobike: motobike
+        traffic_light_green: traffic_light_green
+        traffic_light_orange: traffic_light_orange
+        traffic_light_red: traffic_light_red
+        traffic_sign_30: traffic_sign_30
+        traffic_sign_60: traffic_sign_60
+        traffic_sign_90: traffic_sign_90
+
+    - name: carla_f6
+      workspace: yolo-new-head
+      project: carla-f6
+      version: 1
+      raw_subdir: carla_f6
+      expected_names:
+        0: motorcycle
+        1: pedestrian
+        2: traffic light
+        3: traffic sign
+        4: vehicle
+      class_map:
+        motorcycle: motobike
+        traffic_light: traffic_light_unknown
+        pedestrian: person
+        vehicle: vehicle
+        traffic_sign: traffic_sign_unknown
+
+  # Map custom ids to COCO ids for the pretrained baseline check.
+  baseline_coco_mapping:
+    0:
+      custom_name: bike
+      coco_id: 1
+      coco_name: bicycle
+      note: direct semantic match.
+    1:
+      custom_name: vehicle
+      coco_id: 2
+      coco_name: car
+      note: vehicle labels may include cars and trucks; COCO car is an approximation.
+    2:
+      custom_name: person
+      coco_id: 0
+      coco_name: person
+      note: direct semantic match.
+    3:
+      custom_name: motobike
+      coco_id: 3
+      coco_name: motorcycle
+      note: direct semantic match.
+    4:
+      custom_name: traffic_light_green
+      coco_id: 9
+      coco_name: traffic light
+      note: COCO has traffic lights but not light colors.
+    5:
+      custom_name: traffic_light_orange
+      coco_id: 9
+      coco_name: traffic light
+      note: COCO has traffic lights but not light colors.
+    6:
+      custom_name: traffic_light_red
+      coco_id: 9
+      coco_name: traffic light
+      note: COCO has traffic lights but not light colors.
+    7:
+      custom_name: traffic_sign_30
+      coco_id: 11
+      coco_name: stop sign
+      note: speed signs are approximated as COCO stop sign.
+    8:
+      custom_name: traffic_sign_60
+      coco_id: 11
+      coco_name: stop sign
+      note: speed signs are approximated as COCO stop sign.
+    9:
+      custom_name: traffic_sign_90
+      coco_id: 11
+      coco_name: stop sign
+      note: speed signs are approximated as COCO stop sign.
+    10:
+      custom_name: traffic_light_unknown
+      coco_id: 9
+      coco_name: traffic light
+      note: f6 generic traffic lights are mapped to an unknown light state.
+    11:
+      custom_name: traffic_sign_unknown
+      coco_id: 11
+      coco_name: stop sign
+      note: f6 generic traffic signs are mapped to an unknown sign type.
+
+training:
+  base_model: yolo11s.pt
+  image_size: 640
+  epochs: 50
+  batch: 16
+  patience: 10
+  seed: 42
+  workers: 2
+  optimizer: auto
+
+evaluation:
+  split: val
+  confidence: 0.001
+  iou: 0.6
+  baseline_class_filter: [0, 1, 2, 3, 9, 11]
+
+comparison:
+  baseline_label: pretrained_yolo11s_coco_mapped
+  finetuned_label: finetuned_yolo11s_custom12
+
+outputs:
+  # train and eval outputs stay internal; sample images use workspace/runs/predictions.
+  runs_dir: workspace/internal/runs
+  reports_dir: workspace/reports
+  internal_dir: workspace/internal
+  exports_dir: workspace/exports

@@ -1,0 +1,33 @@
+{
+  "project_name": "carla_pid_speed",
+  "run_dir": "F:\\object-detection\\carla_controllers\\workspace\\runs\\pid_speed_20260625_031508",
+  "map": "Carla/Maps/Town10HD_Opt",
+  "spawn_index": 10,
+  "completed": true,
+  "error": null,
+  "sample_count": 400,
+  "stage_metrics": [
+    {
+      "target_kmh": 20.0,
+      "measurement_start_seconds": 2.0,
+      "measurement_end_seconds": 7.0,
+      "mae_kmh": 1.9394031753191678,
+      "overshoot_kmh": 0.0
+    },
+    {
+      "target_kmh": 10.0,
+      "measurement_start_seconds": 9.0,
+      "measurement_end_seconds": 12.0,
+      "mae_kmh": 0.777392695358747,
+      "overshoot_kmh": 0.0
+    }
+  ],
+  "final_speed_kmh": 0.22004392858232927,
+  "simultaneous_throttle_brake": false,
+  "acceptance": {
+    "passed": true,
+    "max_mae_kmh": 2.0,
+    "max_overshoot_kmh": 3.0,
+    "max_final_speed_kmh": 1.0
+  }
+}

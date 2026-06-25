@@ -1,0 +1,108 @@
+{
+  "source_repo": "https://github.com/DanielHfnr/Carla-Object-Detection-Dataset.git",
+  "raw_dir": "/content/fine_tuning/workspace/raw/Carla-Object-Detection-Dataset",
+  "custom_dataset_yaml": "/content/fine_tuning/workspace/datasets/danielhfnr/custom5/data.yaml",
+  "baseline_coco_dataset_yaml": "/content/fine_tuning/workspace/datasets/danielhfnr/baseline_coco80/data.yaml",
+  "custom_names": {
+    "0": "vehicle",
+    "1": "bike",
+    "2": "motobike",
+    "3": "traffic_light",
+    "4": "traffic_sign"
+  },
+  "baseline_coco_mapping": {
+    "0": {
+      "custom_name": "vehicle",
+      "coco_id": 2,
+      "coco_name": "car",
+      "note": "vehicle labels may include cars and trucks; COCO car is an approximation."
+    },
+    "1": {
+      "custom_name": "bike",
+      "coco_id": 1,
+      "coco_name": "bicycle",
+      "note": "direct semantic match."
+    },
+    "2": {
+      "custom_name": "motobike",
+      "coco_id": 3,
+      "coco_name": "motorcycle",
+      "note": "direct semantic match."
+    },
+    "3": {
+      "custom_name": "traffic_light",
+      "coco_id": 9,
+      "coco_name": "traffic light",
+      "note": "direct semantic match."
+    },
+    "4": {
+      "custom_name": "traffic_sign",
+      "coco_id": 11,
+      "coco_name": "stop sign",
+      "note": "generic traffic sign is approximated as COCO stop sign."
+    }
+  },
+  "splits": {
+    "train": {
+      "images": 623,
+      "empty_label_files": 77,
+      "objects_by_class_id": {
+        "0": 946,
+        "1": 112,
+        "2": 65,
+        "3": 825,
+        "4": 82
+      },
+      "objects_by_class_name": {
+        "vehicle": 946,
+        "bike": 112,
+        "motobike": 65,
+        "traffic_light": 825,
+        "traffic_sign": 82
+      }
+    },
+    "val": {
+      "images": 156,
+      "empty_label_files": 25,
+      "objects_by_class_id": {
+        "0": 226,
+        "1": 39,
+        "2": 16,
+        "3": 232,
+        "4": 13
+      },
+      "objects_by_class_name": {
+        "vehicle": 226,
+        "bike": 39,
+        "motobike": 16,
+        "traffic_light": 232,
+        "traffic_sign": 13
+      }
+    },
+    "test": {
+      "images": 249,
+      "empty_label_files": 40,
+      "objects_by_class_id": {
+        "0": 203,
+        "1": 30,
+        "2": 10,
+        "3": 1586,
+        "4": 10
+      },
+      "objects_by_class_name": {
+        "vehicle": 203,
+        "bike": 30,
+        "motobike": 10,
+        "traffic_light": 1586,
+        "traffic_sign": 10
+      }
+    }
+  },
+  "total_objects_by_class": {
+    "bike": 181,
+    "motobike": 91,
+    "traffic_light": 2643,
+    "traffic_sign": 105,
+    "vehicle": 1375
+  }
+}
