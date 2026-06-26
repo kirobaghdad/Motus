@@ -1,0 +1,13 @@
+{
+  "route": [
+    {"id": 0, "action": "start"},
+    {"id": 1, "action": "turn_left", "turn_degrees": 90},
+    {"id": 2, "action": "straight"},
+    {"id": 3, "action": "turn_left", "turn_degrees": 90},
+    {"id": 4, "action": "straight"},
+    {"id": 5, "action": "turn_left", "turn_degrees": 90},
+    {"id": 6, "action": "turn_left", "turn_degrees": 90},
+    {"id": 7, "action": "straight"},
+    {"id": 8, "action": "stop"}
+  ]
+}

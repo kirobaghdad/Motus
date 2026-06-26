@@ -1,0 +1,85 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "name": "Start S",
+      "x": 2.3,
+      "y": 5.5,
+      "goal": false
+    },
+    {
+      "id": "p1",
+      "name": "Point 1",
+      "x": 2.3,
+      "y": 1.0,
+      "goal": false
+    },
+    {
+      "id": "p2",
+      "name": "Point 2",
+      "x": 5.8,
+      "y": 1.0,
+      "goal": false
+    },
+    {
+      "id": "p3",
+      "name": "Point 3",
+      "x": 5.8,
+      "y": 5.5,
+      "goal": false
+    },
+    {
+      "id": "p4",
+      "name": "Point 4",
+      "x": 6,
+      "y": 7.8,
+      "goal": false
+    },
+    {
+      "id": "p5",
+      "name": "Point 5",
+      "x": 4.2513,
+      "y": 10.5,
+      "goal": false
+    },
+    {
+      "id": "goal_a",
+      "name": "Destination",
+      "x": 2.2,
+      "y": 9.2352,
+      "goal": true
+    }
+  ],
+  "edges": [
+    {
+      "a": "start",
+      "b": "p1",
+      "cost": 4.5
+    },
+    {
+      "a": "p1",
+      "b": "p2",
+      "cost": 3.5
+    },
+    {
+      "a": "p2",
+      "b": "p3",
+      "cost": 4.5
+    },
+    {
+      "a": "p3",
+      "b": "p4",
+      "cost": 2.3
+    },
+    {
+      "a": "p4",
+      "b": "p5",
+      "cost": 2.7
+    },
+    {
+      "a": "p5",
+      "b": "goal_a",
+      "cost": 3.0
+    }
+  ]
+}

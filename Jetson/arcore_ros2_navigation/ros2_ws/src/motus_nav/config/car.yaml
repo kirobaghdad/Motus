@@ -1,0 +1,33 @@
+car:
+  ros__parameters:
+    input_topic: /cmd_vel_safe
+    hardware_enabled: false
+
+    # Working car wiring from the provided controller.
+    motor_pwm_pin: 33
+    motor_direction_pin: 29
+    motor_pwm_frequency_hz: 1000
+    max_pwm_percent: 99.0
+    motor_ramp_step_percent: 5.0
+    motor_ramp_interval_sec: 0.05
+
+    servo_i2c_address: 64
+    servo_channel: 0
+    servo_center_angle_deg: 72.0
+    servo_turn_range_deg: 40.0
+    servo_min_pulse_us: 500
+    servo_max_pulse_us: 2500
+    settings_file: /home/motus/data/motus/car_settings.json
+
+    # Measure/calibrate these for accurate path following.
+    wheelbase_m: 0.25
+    max_steering_angle_rad: 0.45
+    max_forward_speed_mps: 0.25
+    max_reverse_speed_mps: 0.25
+    minimum_drive_pwm_percent: 65.0
+
+    motor_sign: 1.0
+    steering_sign: -1.0
+    allow_reverse: true
+    command_timeout_sec: 1.5
+    speed_deadband_mps: 0.01

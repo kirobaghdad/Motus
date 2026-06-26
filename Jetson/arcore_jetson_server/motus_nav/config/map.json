@@ -1,0 +1,9 @@
+{
+  "image": "/static/map.png",
+  "width_px": 720,
+  "height_px": 1020,
+  "resolution_m_per_px": 0.01,
+  "origin_x_m": 0.0,
+  "origin_y_m": 0.0,
+  "name": "Motus Simple Wide Last Turn Map"
+}

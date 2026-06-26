@@ -1,0 +1,46 @@
+{
+  "hardware": {
+    "enabled": true,
+    "motor_pwm_pin": 33,
+    "motor_dir_pin": 29,
+    "servo_channel": 0,
+    "servo_address": "0x40"
+  },
+  "servo": {
+    "center_deg": 72.0,
+    "range_deg": 40.0,
+    "sign": 1.0
+  },
+  "motor": {
+    "sign": 1.0,
+    "ramp_step": 5.0,
+    "ramp_interval": 0.05,
+    "max_manual_pwm": 55.0
+  },
+  "control": {
+    "wheelbase_m": 0.065,
+    "max_steer_deg": 16.0,
+    "auto_steering_sign": -1.0,
+    "lookahead_m": 0.35,
+    "turn_lookahead_m": 0.95,
+    "corner_anticipation_m": 1.35,
+    "power_mode": "direct_ac",
+    "power_profiles": {
+      "direct_ac": {
+        "normal_pwm": 50.0,
+        "turn_pwm": 38.0
+      },
+      "battery": {
+        "normal_pwm": 98.0,
+        "turn_pwm": 92.0
+      }
+    },
+    "normal_pwm": 50.0,
+    "turn_pwm": 38.0,
+    "goal_tolerance_m": 0.18,
+    "path_tolerance_m": 0.85,
+    "pose_timeout_s": 1.2,
+    "max_pose_step_m": 1.50,
+    "control_hz": 20.0
+  }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motus Map Editor</title>
+    <link rel="stylesheet" href="/static/styles.css?v=map-fit-1">
+    <link rel="stylesheet" href="/static/map_editor.css?v=map-fit-1">
+</head>
+<body>
+<header>
+    <div>
+        <h1>Map Editor</h1>
+        <p>Edit map image, scale, waypoints, destinations, and route links</p>
+    </div>
+    <div class="header-actions">
+        <a href="/" class="link-button">Dashboard</a>
+        <button id="saveMap" class="start">Save Map</button>
+    </div>
+</header>
+
+<main class="editor-layout">
+    <section class="map-card editor-map-card">
+        <div class="editor-canvas-wrap">
+            <canvas id="editorCanvas"></canvas>
+        </div>
+        <p class="hint" id="editorHint">Select a mode, then edit the waypoint graph directly on the map.</p>
+    </section>
+
+    <aside>
+        <section class="card">
+            <h2>Map Image</h2>
+            <label>Upload PNG/JPG<input id="mapUpload" type="file" accept="image/png,image/jpeg,image/webp"></label>
+            <div class="row">
+                <label>Real width (m)<input id="realWidth" type="number" min="0.01" step="0.01"></label>
+                <label>Real height (m)<input id="realHeight" type="number" min="0.01" step="0.01"></label>
+                <label>Name<input id="mapName" type="text"></label>
+            </div>
+            <div class="grid readings">
+                <div><span>Image size</span><strong id="imageSizeValue">-</strong></div>
+                <div><span>Resolution</span><strong id="resolutionValue">-</strong></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Tools</h2>
+            <div class="tool-grid">
+                <button data-tool="select" class="selected">Select</button>
+                <button data-tool="add">Add Node</button>
+                <button data-tool="connect">Connect</button>
+                <button data-tool="delete-edge">Delete Link</button>
+                <button data-tool="delete">Delete Node</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Selected Node</h2>
+            <div class="row">
+                <label>ID<input id="nodeId" type="text"></label>
+                <label>Name<input id="nodeName" type="text"></label>
+                <label>Speed PWM<input id="nodeSpeed" type="number" min="0" max="100" step="1"></label>
+            </div>
+            <div class="row">
+                <label>X (m)<input id="nodeX" type="number" step="0.01"></label>
+                <label>Y (m)<input id="nodeY" type="number" step="0.01"></label>
+                <label class="checkbox-label"><input id="nodeGoal" type="checkbox"> Destination</label>
+            </div>
+            <button id="applyNode" class="secondary">Apply Node Changes</button>
+            <p class="hint" id="selectedNodeValue">No node selected</p>
+        </section>
+
+        <section class="card">
+            <h2>Graph</h2>
+            <div class="grid readings">
+                <div><span>Nodes</span><strong id="nodeCountValue">0</strong></div>
+                <div><span>Edges</span><strong id="edgeCountValue">0</strong></div>
+            </div>
+            <p class="hint">Connect mode: click one node, then another. Delete Link removes the nearest connection.</p>
+        </section>
+    </aside>
+</main>
+
+<div id="toast"></div>
+<script src="/static/map_editor.js?v=map-fit-1"></script>
+</body>
+</html>

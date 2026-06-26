@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motus Navigation</title>
+    <link rel="stylesheet" href="/static/styles.css?v=map-fit-1">
+</head>
+<body>
+<header>
+    <div>
+        <h1>Motus Navigation</h1>
+        <p>ARCore localization and onboard trajectory control</p>
+    </div>
+    <div class="header-actions">
+        <a href="/map-editor" class="link-button">Map Editor</a>
+        <div id="mainStatus" class="status bad">Starting server connection...</div>
+    </div>
+</header>
+
+<main>
+    <section class="map-card">
+        <div id="mapWrap" class="map-wrap">
+            <div id="mapStage" class="map-stage">
+                <img id="mapImage" alt="Navigation map">
+                <canvas id="mapCanvas"></canvas>
+            </div>
+        </div>
+        <p class="hint">Click the map to choose the known starting position, enter its heading, then press Set Initial Pose.</p>
+    </section>
+
+    <aside>
+        <section class="card">
+            <h2>Localization</h2>
+            <div class="grid readings">
+                <div><span>Phone</span><strong id="phoneValue">Disconnected</strong></div>
+                <div><span>ARCore</span><strong id="trackingValue">Not tracking</strong></div>
+                <div><span>Map X</span><strong id="xValue">-</strong></div>
+                <div><span>Map Y</span><strong id="yValue">-</strong></div>
+                <div><span>Local X</span><strong id="localXValue">-</strong></div>
+                <div><span>Local Y</span><strong id="localYValue">-</strong></div>
+                <div><span>AR distance</span><strong id="poseDistanceValue">-</strong></div>
+                <div><span>AR speed</span><strong id="poseSpeedValue">-</strong></div>
+                <div><span>Heading</span><strong id="yawValue">-</strong></div>
+                <div><span>Pose age</span><strong id="ageValue">-</strong></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Initial Pose</h2>
+            <div class="row">
+                <label>X (m)<input id="initX" type="number" step="0.01" value="1.0"></label>
+                <label>Y (m)<input id="initY" type="number" step="0.01" value="1.0"></label>
+                <label>Yaw (deg)<input id="initYaw" type="number" step="1" value="0"></label>
+            </div>
+            <button id="setInit" class="secondary">Set Initial Pose</button>
+        </section>
+
+        <section class="card">
+            <h2>Destination</h2>
+            <div id="goalButtons" class="goal-list"></div>
+            <div class="action-row">
+                <button id="startButton" class="start">Start</button>
+                <button id="stopButton" class="stop">Emergency Stop</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Power Mode</h2>
+            <div class="segmented">
+                <button id="directPowerButton" data-power-mode="direct_ac">Direct AC</button>
+                <button id="batteryPowerButton" data-power-mode="battery">Battery</button>
+            </div>
+            <div class="grid readings power-readings">
+                <div><span>Normal PWM</span><strong id="normalPwmValue">-</strong></div>
+                <div><span>Turn PWM</span><strong id="turnPwmValue">-</strong></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Vehicle State</h2>
+            <p><strong id="modeValue">IDLE</strong></p>
+            <p id="messageValue">Waiting for data</p>
+            <div class="grid readings">
+                <div><span>Motor PWM</span><strong id="pwmValue">0</strong></div>
+                <div><span>Steering</span><strong id="steerValue">0</strong></div>
+                <div><span>Path error</span><strong id="pathErrorValue">-</strong></div>
+                <div><span>Heading error</span><strong id="headingErrorValue">-</strong></div>
+                <div><span>Target X</span><strong id="targetXValue">-</strong></div>
+                <div><span>Target Y</span><strong id="targetYValue">-</strong></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Steering Trim</h2>
+            <label>Servo center <input id="servoCenter" type="range" min="0" max="180" step="1" value="72"></label>
+            <div class="slider-value"><strong id="servoCenterValue">72</strong> deg</div>
+            <label>Turn range <input id="servoRange" type="range" min="0" max="80" step="1" value="40"></label>
+            <div class="slider-value">+/- <strong id="servoRangeValue">40</strong> deg</div>
+            <button id="saveServo" class="secondary">Save Steering Trim</button>
+        </section>
+
+        <section class="card">
+            <h2>Manual Hardware Test</h2>
+            <p class="hint">Use only while the wheels are raised during first testing.</p>
+            <div id="joystick" class="joystick">
+                <div id="joystickKnob" class="joystick-knob"></div>
+            </div>
+            <div class="manual-readout">
+                <span>Command PWM <strong id="cmdSpeed">0</strong></span>
+                <span>Steering <strong id="cmdSteering">0.00</strong></span>
+            </div>
+        </section>
+    </aside>
+</main>
+
+<div id="toast"></div>
+<script src="/static/app.js?v=map-fit-1"></script>
+</body>
+</html>

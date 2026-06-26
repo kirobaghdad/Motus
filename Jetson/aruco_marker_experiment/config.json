@@ -1,0 +1,52 @@
+{
+  "network": {
+    "port": 5000
+  },
+  "camera": {
+    "frame_flip_code": -1
+  },
+  "imu": {
+    "gyro_axis": 1,
+    "gyro_sign": 1.0
+  },
+  "control": {
+    "frequency_hz": 20,
+    "forward_throttle": 0.50,
+    "turn_throttle": 0.40,
+    "heading_kp": 0.035,
+    "marker_kp": 0.65,
+    "turn_kp": 0.025,
+    "turn_tolerance_deg": 5.0,
+    "turn_timeout_s": 30.0,
+    "marker_trigger_area_ratio": 0.009,
+    "segment_timeout_s": 30.0,
+    "speed_scale": 1.0,
+    "speed_step": 0.05,
+    "min_speed_scale": 0.1,
+    "max_speed_scale": 1.0
+  },
+  "keyboard": {
+    "start_key": "s",
+    "restart_key": "r",
+    "quit_key": "q",
+    "speed_up_key": "+",
+    "speed_down_key": "-",
+    "gyro_axis_key": "g"
+  },
+  "gpio": {
+    "motor_pwm_pin": 33,
+    "motor_dir_pin": 29,
+    "motor_pwm_hz": 1000,
+    "servo_channels": 16,
+    "servo_i2c_address": "0x40",
+    "servo_channel": 0,
+    "servo_center_angle": 72.0,
+    "servo_turn_range": 46.0,
+    "servo_min_pulse_us": 500,
+    "servo_max_pulse_us": 2500,
+    "motor_ramp_step": 5.0,
+    "motor_ramp_interval": 0.05,
+    "throttle_sign": 1.0,
+    "steering_sign": -1.0
+  }
+}
