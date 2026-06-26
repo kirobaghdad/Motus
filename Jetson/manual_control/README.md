@@ -6,12 +6,9 @@ Legacy Jetson-side manual control and hardware test scripts copied from `/home/m
 
 - `car_control.py` - Flask-based manual driving UI/API with motor, servo, encoder, and watchdog handling.
 - `camera_stream.py` - Jetson camera stream utility.
-- `imu_control.py` - IMU control/test script.
+- `mpu_6050.py` - MPU6050/MPU6500 hardware IMU reader over I2C.
 - `motor_driver.py` - standalone motor driver helper.
 - `servo_motor.py` - standalone servo test/helper.
-- `check_mode.py` - GPIO numbering mode check.
-- `encoder_test.py` - encoder test script.
-- `encoder_calibration.py` - encoder calibration workflow.
 - `config/` - copied runtime JSON settings from `/home/motus/data/motus`.
 
 ## Runtime Note

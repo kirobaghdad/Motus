@@ -5,7 +5,7 @@ This folder contains the Jetson-side code only. Android phone apps, desktop-only
 ## Structure
 
 - `aruco_marker_experiment/` - Python prototype for ArUco marker detection, IMU-assisted heading control, routing, and Jetson motor control.
-- `manual_control/` - Legacy Jetson manual-control scripts for direct motor, servo, encoder, camera, and IMU tests.
+- `manual_control/` - Legacy Jetson manual-control scripts for direct motor, servo, encoder, and camera tests.
 - `arcore_ros2_navigation/` - ROS 2 Humble package and Jetson run scripts for the ARCore navigation experiment.
 - `arcore_jetson_server/` - Standalone Jetson web/navigation server with map, graph, planner, controller, and hardware integration code.
 
