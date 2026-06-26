@@ -172,6 +172,7 @@ function optimizerPipeline(startNearestNodeEdge, destNearestNodeEdge) {
     if (path) {
         return path;
     }
+    //if (!path) return null;
     path = solveSameNodeCase(startNearestNodeEdge, destNearestNodeEdge);
     if (path) {
         poses = completePath(startNearestNodeEdge, destNearestNodeEdge, path);
@@ -231,9 +232,11 @@ function completePath(startNearestNodeEdge, destNearestNodeEdge, path) {
 
 function combinePaths(carNearestNodeEdge, startNearestNodeEdge, destNearestNodeEdge) {
     const path1 = optimizerPipeline(carNearestNodeEdge, startNearestNodeEdge);
+    if (!path1) return null;
     // remove repeated start
     path1.pop();
     const path2 = optimizerPipeline(startNearestNodeEdge, destNearestNodeEdge);
+    if (!path2) return null;
     return [...path1, ...path2];
 }
 
@@ -255,15 +258,17 @@ function findFinalNearestNode(pose) {
         return null;
     }
     let nearestNodeEdge2 = null;
+    let finalPlace = null;
     if ("place" in nearestNodeEdge) {
+        finalPlace = nearestNodeEdge.place;
         const position = nearestNodeEdge.place.entrance_position;
         nearestNodeEdge2 = hdmap.findRegionInMap(position);
     }
     let finalId = null;
     let finalEdge = null;
-    let finalPlace = null;
+
     if (nearestNodeEdge2) {
-        finalPlace = nearestNodeEdge.place;
+        //finalPlace = nearestNodeEdge.place;
         if ("edge" in nearestNodeEdge2) {
             finalEdge = nearestNodeEdge2.edge;
         } else {

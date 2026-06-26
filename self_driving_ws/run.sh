@@ -5,6 +5,13 @@ ros2 run my_car_nav map_loader
 ros2 run my_car_nav test_car.py
 ros2 run my_car_nav create_map.py
 
+sudo systemctl start mongod
+sudo systemctl stop mongod
+
+mongosh
+use CarService
+
+
 
 colcon build --packages-select my_car_nav
 source install/setup.bash

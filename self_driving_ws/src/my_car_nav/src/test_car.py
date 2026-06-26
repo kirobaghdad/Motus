@@ -201,7 +201,7 @@ class SimpleSim(Node):
         # transform points to car local world coordinate
         return np.array([self.x,self.y,self.z]) * -1
 
-    def publish_cloud_points(self):
+    def publish_cloud_points(self,timestamp):
         cloud_points = self.find_objects_inFrontOf_camera()
         if len(cloud_points) == 0:
             return
@@ -214,7 +214,7 @@ class SimpleSim(Node):
         try:
             # Create the PointCloud2 message
             msg = PointCloud2()
-            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.stamp = timestamp
             msg.header.frame_id = 'base_link'
 
             # Define the structure (X, Y, Z)
@@ -248,12 +248,14 @@ class SimpleSim(Node):
         self.y += self.linear_x * math.sin(self.th) * self.dt
         self.th += self.angular_z * self.dt
 
+        timestamp = self.get_clock().now().to_msg()
+
         # 2. publish geometric point cloud
-        self.publish_cloud_points()
+        self.publish_cloud_points(timestamp)
 
         # 3. Broadcast system transformations (Odom -> Base Link)
         tf_odom_base_link = TransformStamped()
-        tf_odom_base_link.header.stamp = self.get_clock().now().to_msg()
+        tf_odom_base_link.header.stamp = timestamp
         tf_odom_base_link.header.frame_id = 'odom'
         tf_odom_base_link.child_frame_id = 'base_link'
         tf_odom_base_link.transform.translation.x = self.x - self.car_initial_pose[0]
@@ -265,7 +267,7 @@ class SimpleSim(Node):
 
         # 4. Broadcast system transformations (map -> odom)
         tf_map_odom = TransformStamped()
-        tf_map_odom.header.stamp = self.get_clock().now().to_msg()
+        tf_map_odom.header.stamp = timestamp
         tf_map_odom.header.frame_id = 'map'
         tf_map_odom.child_frame_id = 'odom'
         tf_map_odom.transform.translation.x = self.car_initial_pose[0]
@@ -277,7 +279,7 @@ class SimpleSim(Node):
 
         # 5. Publish Odometry
         odom_msg = Odometry()
-        odom_msg.header.stamp = self.get_clock().now().to_msg()
+        odom_msg.header.stamp = timestamp
         odom_msg.header.frame_id = 'odom'
         odom_msg.child_frame_id = 'base_link'
         

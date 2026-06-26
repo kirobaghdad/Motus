@@ -35,7 +35,7 @@ public:
         
     PathHandler() : Node("path_handler") {
         // declare parameters for node 
-        this->declare_parameter<int>("max_window_size", 16);
+        this->declare_parameter<double>("max_window_size", 16.0);
         this->declare_parameter<int>("max_wait_minutes", 3);
         this->declare_parameter<float>("max_distance_from_obstacle", 1);
         this->declare_parameter<float>("car_width", 0.3);
@@ -460,7 +460,9 @@ private:
     }
 
     void backend_poses_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "Path received from backend, processing...");
         if (path_queue.empty()) {
+            RCLCPP_INFO(this->get_logger(), "Processing path...");
             for (const auto& individual_pose : msg->poses) {
         
                 geometry_msgs::msg::PoseStamped sub_goal;

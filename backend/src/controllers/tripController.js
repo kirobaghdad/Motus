@@ -129,7 +129,6 @@ const tripController = {
         startLocation = parsePose(startLocation);
         destination = parsePose(destination);
         poses = getPath(startLocation, destination);
-
         if (!poses) {
             return res.status(500).json({ error: "can not find path" });
         }
