@@ -1,0 +1,123 @@
+amcl:
+  ros__parameters:
+    use_sim_time: false
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: false
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: odom
+
+map_server:
+  ros__parameters:
+    use_sim_time: false
+    # Path to your map metadata YAML file
+    yaml_filename: "/home/ali/GP/Motus/self_driving_ws/src/my_car_nav/maps/test_map/test_map.yaml"
+    topic_name: "initial_map"
+    treat_unknown_as_free: false
+
+lifecycle_manager_navigation:
+  ros__parameters:
+    use_sim_time: false
+    autostart: true
+    # Node names must match exactly what is run in your launch file
+    node_names: ['map_server', 'planner_server', 'controller_server', 'bt_navigator', 'waypoint_follower']
+
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    controller_frequency: 10.0
+    min_x_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.001
+    odom_topic: odom
+    progress_checker_plugin: "progress_checker"
+    ProgressChecker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.02 # Dropped from 0.1m to 2cm to accommodate micro-movements
+      movement_time_allowance: 10.0
+    GoalChecker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+    FollowPath:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      max_linear_vel: 1.2
+      min_linear_vel: -1.2
+      max_angular_vel: 1.0
+      min_angular_vel: -1.0
+      max_linear_accel: 1.0
+      max_linear_decel: -1.0
+      max_angular_accel: 1.0
+      max_angular_decel: -1.0
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      rotate_to_heading_angular_vel: 1.8
+      use_velocity_scaled_lookahead_dist: false
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.6
+      use_collision_detection: true
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      use_regulated_linear_velocity_scaling: true
+      use_fixed_curvature_lookahead: false
+      curvature_lookahead_dist: 0.25
+      use_cost_regulated_linear_velocity_scaling: false
+      cost_scaling_dist: 0.3
+      cost_scaling_gain: 1.0
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      use_rotate_to_heading: true
+      allow_reversing: false
+      rotate_to_heading_min_angle: 0.785
+      min_distance_to_obstacle: 0.1
+      use_dynamic_window: false
+      allow_obstacle_checking_beyond_goal: false
+      scaling_factor: 1.0
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: false
+      global_frame: odom
+      robot_base_frame: base_link
+      rolling_window: true
+      width: 5
+      height: 5
+      resolution: 0.05
+      footprint: "[[-0.15, -0.1], [0.15, -0.1], [0.15, 0.1], [-0.15, 0.1]]"
+      plugins: ["obstacle_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: pointcloud_source
+        pointcloud_source:
+          topic: /cloud_points
+          sensor_frame: base_link
+          data_type: PointCloud2
+          clearing: true
+          marking: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        inflation_radius: 0.25
+        cost_scaling_factor: 5.0
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      use_sim_time: false
+      global_frame: map
+      robot_base_frame: base_link
+      footprint: "[[-0.15, -0.1], [0.15, -0.1], [0.15, 0.1], [-0.15, 0.1]]"
+      track_unknown_space: true
+      trinary_costmap: true
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+        subscribe_to_updates: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        inflation_radius: 0.15
+        cost_scaling_factor: 5.0

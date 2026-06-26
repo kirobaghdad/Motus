@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Phone Sensor Sender</string>
+    <string name="jetson_ip_hint">Jetson IP</string>
+    <string name="default_jetson_ip">192.168.42.2</string>
+    <string name="port_hint">Port</string>
+    <string name="default_port">5000</string>
+    <string name="start_stream">START STREAM</string>
+    <string name="stop">STOP</string>
+    <string name="initial_status">Enable USB tethering, enter the Jetson IP, then press START.</string>
+    <string name="invalid_ip">Enter a valid Jetson IP address.</string>
+    <string name="invalid_port">Enter a valid port from 1 to 65535.</string>
+    <string name="connecting_status">Connecting to %1$s:%2$d &#8230;</string>
+    <string name="streaming_status">Streaming grayscale camera + IMU</string>
+    <string name="camera_permission_required">Camera permission is required.</string>
+    <string name="missing_sensors_status">Streaming; missing %1$s sensor data.</string>
+</resources>

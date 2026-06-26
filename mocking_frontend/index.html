@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GP Communication Test Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f7fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .test-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a365d;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .field-group {
+            margin-bottom: 15px;
+        }
+
+        .coordinates-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2c5282;
+        }
+
+        button:disabled {
+            background-color: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .status-box {
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        #login-status {
+            background-color: #ebd18a;
+            color: #6b4c00;
+            border: 1px solid #d6b86b;
+        }
+
+        #trip-status {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .error {
+            background-color: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="login-status" class="status-box">Initializing and attempting automatic authentication...</div>
+
+    <div class="test-card">
+        <h2>Trip Communication Test</h2>
+        <form id="tripForm">
+            <div class="field-group">
+                <label>Start Position</label>
+                <div class="coordinates-row">
+                    <input type="number" id="startX" step="0.01" placeholder="X (meters)" required value="0.0">
+                    <input type="number" id="startY" step="0.01" placeholder="Y (meters)" required value="0.0">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Destination Position</label>
+                <div class="coordinates-row">
+                    <input type="number" id="destX" step="0.01" placeholder="X (meters)" required value="0.3">
+                    <input type="number" id="destY" step="0.01" placeholder="Y (meters)" required value="0.0">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" disabled>Waiting for Auth Token...</button>
+        </form>
+
+        <div id="trip-status" class="status-box"></div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. AUTHENTICATION & CONFIGURATION VARIABLES
+        // =========================================================================
+        const USERNAME = "alisamy";             // Modify with your test user credentials
+        const PASSWORD = "123"; // Modify with your test user password
+
+        const LOGIN_URL = 'http://localhost:3000/login'; // Your backend login route
+        const TRIP_URL = 'http://localhost:3000/immediate-trip';   // Your backend trip endpoint
+
+        // Global memory variable to capture the token
+        let authToken = null;
+
+        // =========================================================================
+        // 2. AUTOMATIC LOGIN SEQUENCE (EXECUTES ON PAGE LOAD)
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            const loginStatus = document.getElementById('login-status');
+            const submitBtn = document.getElementById('submitBtn');
+
+            try {
+                const response = await fetch(LOGIN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: USERNAME,
+                        password: PASSWORD
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Extracting token. Adjust property lookup (e.g., data.token or data.accessToken) 
+                    // depending on how your partner's backend formats the response object.
+                    authToken = data.token || data.accessToken;
+
+                    if (authToken) {
+                        loginStatus.className = 'status-box success';
+                        loginStatus.innerText = `Authenticated Successfully! Token cached securely.`;
+
+                        // Enable user submission since we have a valid token
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = 'Send Immediate Trip';
+                    } else {
+                        loginStatus.className = 'status-box error';
+                        loginStatus.innerText = 'Login payload received, but no token field found in JSON response.';
+                    }
+                } else {
+                    loginStatus.className = 'status-box error';
+                    loginStatus.innerText = `Authentication Failed. Server Status: ${response.status}`;
+                }
+            } catch (error) {
+                loginStatus.className = 'status-box error';
+                loginStatus.innerText = `Auth Connection Error: Cannot connect to login endpoint server.`;
+                console.error('Authentication error:', error);
+            }
+        });
+
+        // =========================================================================
+        // 3. TRIP DISPATCH SUBMISSION (INJECTS CACHED TOKEN)
+        // =========================================================================
+        document.getElementById('tripForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Safety check to verify token is present
+            if (!authToken) {
+                alert("No auth token available. Cannot submit trip data request.");
+                return;
+            }
+
+            const startX = parseFloat(document.getElementById('startX').value);
+            const startY = parseFloat(document.getElementById('startY').value);
+            const destX = parseFloat(document.getElementById('destX').value);
+            const destY = parseFloat(document.getElementById('destY').value);
+
+            const PAYLOAD_STRUCTURE = {
+                startLocation: { x: startX, y: startY },
+                destination: { x: destX, y: destY }
+            };
+
+            const tripStatus = document.getElementById('trip-status');
+            tripStatus.style.display = 'block';
+            tripStatus.className = 'status-box';
+            tripStatus.innerText = 'Dispatching mission parameters with auth context...';
+
+            try {
+                const response = await fetch(TRIP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Standard JWT/Bearer authentication schema integration
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(PAYLOAD_STRUCTURE)
+                });
+
+                console.log(response.body.message);
+
+                if (response.ok) {
+                    tripStatus.className = 'status-box success';
+                    tripStatus.innerText = `Success! Trip transmitted safely with valid authorization token header.`;
+                } else {
+                    tripStatus.className = 'status-box error';
+                    tripStatus.innerText = `Trip Submission Rejected. Server Response Code: ${response.status}`;
+                }
+            } catch (error) {
+                tripStatus.className = 'status-box error';
+                tripStatus.innerText = `Network Error: Connection failed while processing trip data packet.`;
+                console.error('Trip communication error:', error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

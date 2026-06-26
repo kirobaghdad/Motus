@@ -1,0 +1,27 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Android/Gradle generated files
+**/build/
+**/.gradle/
+**/.kotlin/
+**/local.properties
+*.apk
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets/config
+**/.env
+**/env
+
+# Node generated files
+node_modules/
+
