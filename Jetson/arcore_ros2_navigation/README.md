@@ -58,4 +58,3 @@ Clear the latched stop:
 ./scripts/clear_stop.sh
 ```
 
-Review `STILL_NEEDED.md` before enabling the real car.
