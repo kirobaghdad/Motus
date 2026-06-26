@@ -1,0 +1,50 @@
+project_name: carla_pid_speed
+
+carla:
+  host: localhost
+  port: 2000
+  timeout_seconds: 20.0
+  expected_map: Town10HD_Opt
+  fixed_delta_seconds: 0.05
+  seed: 42
+
+vehicle:
+  blueprint_filter: vehicle.tesla.model3
+  spawn_index: null
+  spawn_height_offset_m: 0.3
+  straight_road:
+    required_distance_m: 70.0
+    step_m: 5.0
+    max_heading_change_deg: 5.0
+    allow_junctions: false
+
+control:
+  duration_seconds: 20.0
+  max_throttle: 0.75
+  max_brake: 0.80
+  pid:
+    kp: 0.15
+    ki: 0.01
+    kd: 0.02
+    integral_limit: 10.0
+    derivative_smoothing: 0.5
+  speed_profile:
+    - start_seconds: 0.0
+      end_seconds: 7.0
+      target_kmh: 20.0
+    - start_seconds: 7.0
+      end_seconds: 12.0
+      target_kmh: 10.0
+    - start_seconds: 12.0
+      end_seconds: 20.0
+      target_kmh: 0.0
+
+acceptance:
+  transition_ignore_seconds: 2.0
+  max_mae_kmh: 2.0
+  max_overshoot_kmh: 3.0
+  max_final_speed_kmh: 1.0
+
+outputs:
+  runs_dir: workspace/runs
+  run_prefix: pid_speed

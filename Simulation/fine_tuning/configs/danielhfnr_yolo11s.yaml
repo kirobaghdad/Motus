@@ -1,0 +1,68 @@
+project_name: carla_yolo11s_danielhfnr
+
+dataset:
+  repo_url: https://github.com/DanielHfnr/Carla-Object-Detection-Dataset.git
+  repo_branch: master
+  raw_dir: workspace/raw/Carla-Object-Detection-Dataset
+  prepared_root: workspace/datasets/danielhfnr
+  custom_dataset_dir: workspace/datasets/danielhfnr/custom5
+  baseline_dataset_dir: workspace/datasets/danielhfnr/baseline_coco80
+
+  # keep this order aligned with the label ids.
+  custom_names:
+    0: vehicle
+    1: bike
+    2: motobike
+    3: traffic_light
+    4: traffic_sign
+
+  # map custom ids to coco ids for the baseline check.
+  baseline_coco_mapping:
+    0:
+      custom_name: vehicle
+      coco_id: 2
+      coco_name: car
+      note: vehicle labels may include cars and trucks; COCO car is an approximation.
+    1:
+      custom_name: bike
+      coco_id: 1
+      coco_name: bicycle
+      note: direct semantic match.
+    2:
+      custom_name: motobike
+      coco_id: 3
+      coco_name: motorcycle
+      note: direct semantic match.
+    3:
+      custom_name: traffic_light
+      coco_id: 9
+      coco_name: traffic light
+      note: direct semantic match.
+    4:
+      custom_name: traffic_sign
+      coco_id: 11
+      coco_name: stop sign
+      note: generic traffic sign is approximated as COCO stop sign.
+
+training:
+  base_model: yolo11s.pt
+  image_size: 640
+  epochs: 50
+  batch: 16
+  patience: 10
+  seed: 42
+  workers: 2
+  optimizer: auto
+
+evaluation:
+  split: test
+  confidence: 0.001
+  iou: 0.6
+  # only evaluate the coco classes used above.
+  baseline_class_filter: [1, 2, 3, 9, 11]
+
+outputs:
+  runs_dir: workspace/runs
+  reports_dir: workspace/reports
+  internal_dir: workspace/internal
+  exports_dir: workspace/exports

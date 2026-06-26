@@ -1,0 +1,13 @@
+custom_class,baseline_coco_class,baseline_ap50,finetuned_ap50,delta_ap50,mapping_note
+bike,bicycle,0.044700748017348156,0.40135876149331406,0.35665801347596593,direct semantic match.
+vehicle,car,0.599954619486308,0.8586159452010852,0.2586613257147772,vehicle labels may include cars and trucks; COCO car is an approximation.
+person,person,0.4394632666648436,0.7925700513493235,0.35310678468447987,direct semantic match.
+motobike,motorcycle,0.2912678140004584,0.7888783586614473,0.49761054466098886,direct semantic match.
+traffic_light_green,traffic light,0.4302848569458394,0.5701626826099295,0.13987782566409013,COCO has traffic lights but not light colors.
+traffic_light_orange,traffic light,0.4302848569458394,0.08135042765813119,-0.34893442928770824,COCO has traffic lights but not light colors.
+traffic_light_red,traffic light,0.4302848569458394,0.5241151659650636,0.09383030901922418,COCO has traffic lights but not light colors.
+traffic_sign_30,stop sign,0.44283820447586325,0.22594457958622044,-0.2168936248896428,speed signs are approximated as COCO stop sign.
+traffic_sign_60,stop sign,0.44283820447586325,0.18846153846153846,-0.2543766660143248,speed signs are approximated as COCO stop sign.
+traffic_sign_90,stop sign,0.44283820447586325,0.07444444444444445,-0.36839376003141877,speed signs are approximated as COCO stop sign.
+traffic_light_unknown,traffic light,0.4302848569458394,0.6880051320135839,0.25772027506774453,f6 generic traffic lights are mapped to an unknown light state.
+traffic_sign_unknown,stop sign,0.44283820447586325,0.7414819768294372,0.2986437723535739,f6 generic traffic signs are mapped to an unknown sign type.

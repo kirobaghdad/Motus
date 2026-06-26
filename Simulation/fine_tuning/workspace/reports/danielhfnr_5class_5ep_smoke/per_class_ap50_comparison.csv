@@ -1,0 +1,6 @@
+custom_class,baseline_coco_class,baseline_ap50,finetuned_ap50,delta_ap50,mapping_note
+vehicle,car,0.8979575395041806,0.9509967379366847,0.05303919843250415,vehicle labels may include cars and trucks; COCO car is an approximation.
+bike,bicycle,0.07509582221903194,0.9411450216450218,0.8660491994259898,direct semantic match.
+motobike,motorcycle,0.7235714285714285,0.7095370370370369,-0.014034391534391677,direct semantic match.
+traffic_light,traffic light,0.36830939451903133,0.6051503605389785,0.2368409660199472,direct semantic match.
+traffic_sign,stop sign,0.4434634920634921,0.5216904826426527,0.0782269905791606,generic traffic sign is approximated as COCO stop sign.
