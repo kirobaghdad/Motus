@@ -11,8 +11,6 @@ Jetson-side code for the marker and IMU robot prototype.
 - `protocol.py` - shared message parsing helpers.
 - `config.json` - gains, GPIO pins, network port, and gyro settings.
 - `route.json` - ordered marker route definition.
-- `generate_markers.py` - utility for regenerating ArUco marker images.
-- `reference_code/` - original car-control reference files kept for traceability.
 
 ## Basic Run
 

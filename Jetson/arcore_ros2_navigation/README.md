@@ -10,7 +10,6 @@ The system uses ARCore pose, camera, calibration, and depth data streamed from t
 arcore_ros2_navigation/
 ├── ros2_ws/src/motus_nav/  ROS 2 package
 ├── scripts/                Jetson install, build, mapping, navigation, and safety scripts
-├── STILL_NEEDED.md         remaining calibration notes
 └── LICENSE
 ```
 
