@@ -9,9 +9,9 @@ Motus is a 1:10 autonomous vehicle prototype for indoor navigation. It uses a Je
 
 ## Demo
 
-[![Motus demo](assets/demos/GP-Demo-thumbnail.png)](assets/demos/GP-Demo.mp4)
+[![Motus demo preview](assets/demos/GP-Demo-preview.gif)](assets/demos/GP-Demo.mp4)
 
-[View demo video](assets/demos/GP-Demo.mp4)
+[Watch full demo video](assets/demos/GP-Demo.mp4)
 
 ## Main Features
 
