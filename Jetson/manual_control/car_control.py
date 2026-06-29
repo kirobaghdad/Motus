@@ -89,7 +89,6 @@ SERVO_TURN_RANGE = loaded_settings["servo_turn_range"]
 MOTOR_RAMP_STEP = 5
 MOTOR_RAMP_INTERVAL = 0.05
 
-# Calibrate this after real 1-meter test
 WHEEL_DIAMETER_M = 0.065
 TICKS_PER_WHEEL_REV = 180
 
@@ -249,8 +248,6 @@ class MotorDriver:
                 target = self.target_speed
                 current = self.current_output_speed
 
-                # If direction changes, do not jump directly from forward to backward.
-                # First ramp down to 0, then ramp up in the opposite direction.
                 if current != 0 and target != 0 and (current > 0) != (target > 0):
                     if current > 0:
                         next_speed = max(0, current - self.ramp_step)
